@@ -1,0 +1,210 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import HowToOrder from '../components/HowToOrder.astro';
+import BusinessDetails from '../components/BusinessDetails.astro';
+import { products, settings } from '../lib/catalog';
+import { prettyPhone, telUrl, waUrl } from '../lib/messages';
+
+const waPretty = `${settings.whatsapp.slice(-10, -5)} ${settings.whatsapp.slice(-5)}`;
+---
+
+<Base title="Contact and how to order" description="Order or ask a question on WhatsApp, Instagram or phone. DITTO HUB delivers across India.">
+  <section class="wrap page-head">
+    <nav aria-label="Breadcrumb" class="crumbs">
+      <ol><li><a href="/">Home</a></li><li aria-current="page">Contact</li></ol>
+    </nav>
+    <h1 class="page-title">Talk to us</h1>
+    <p class="page-lead">The quickest way to order or ask anything is WhatsApp. We reply through the day.</p>
+  </section>
+
+  <section class="wrap contact-grid" aria-label="Ways to reach DITTO HUB">
+    <div class="channels">
+      <a class="channel channel-wa" href={waUrl(settings.whatsapp, 'Hi DITTO HUB! I have a question.')} target="_blank" rel="noopener" data-track="whatsapp-contact">
+        <Icon name="chat" />
+        <span><strong>WhatsApp</strong><span>{waPretty} · orders and questions</span></span>
+      </a>
+      <a class="channel" href={telUrl(settings.phone)} data-track="call-contact">
+        <Icon name="phone" />
+        <span><strong>Call</strong><span>{prettyPhone(settings.phone)}</span></span>
+      </a>
+      <a class="channel" href={`https://ig.me/m/${settings.instagram}`} target="_blank" rel="noopener" data-track="instagram-contact">
+        <Icon name="camera" />
+        <span><strong>Instagram DM</strong><span>@{settings.instagram}</span></span>
+      </a>
+      {
+        settings.whatsappGroup && (
+          <a class="channel" href={settings.whatsappGroup} target="_blank" rel="noopener" data-track="group-contact">
+            <Icon name="users" />
+            <span>
+              <strong>Daily drops group</strong>
+              <span>New arrivals and flash deals first</span>
+            </span>
+          </a>
+        )
+      }
+      <BusinessDetails class="contact-business" />
+    </div>
+
+    <form class="enquiry" data-enquiry novalidate aria-labelledby="enquiry-title">
+      <h2 id="enquiry-title">Send a question</h2>
+      <p class="note">This opens WhatsApp with your message written out. Nothing is stored on this website.</p>
+      <div class="field">
+        <label for="enq-name">Your name</label>
+        <input class="input" id="enq-name" name="name" autocomplete="name" required />
+        <p class="field-error" data-error-for="name" hidden>Add your name.</p>
+      </div>
+      <div class="field">
+        <label for="enq-phone">Mobile number</label>
+        <input class="input" id="enq-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="10-digit mobile number" required />
+        <p class="field-error" data-error-for="phone" hidden>Enter a 10-digit Indian mobile number, like 98765 43210.</p>
+      </div>
+      <div class="field">
+        <label for="enq-product">Product (optional)</label>
+        <select class="select" id="enq-product" name="product">
+          <option value="">Not about a specific product</option>
+          {products.map((p) => <option value={`${p.name} (ID: ${p.id})`}>{p.name} · {p.id}</option>)}
+        </select>
+      </div>
+      <div class="field">
+        <label for="enq-message">Your question</label>
+        <textarea class="textarea" id="enq-message" name="message" rows="4" required placeholder="For example: is size UK 9 in stock, and when can it reach Kochi?"></textarea>
+        <p class="field-error" data-error-for="message" hidden>Write your question.</p>
+      </div>
+      <button class="btn btn-wa" type="submit"><Icon name="chat" />Send on WhatsApp</button>
+    </form>
+  </section>
+
+  <HowToOrder id="how-to-order" />
+</Base>
+
+<style>
+  .contact-grid {
+    display: grid;
+    gap: 28px;
+    padding-bottom: clamp(40px, 6vw, 72px);
+  }
+
+  @media (min-width: 1000px) {
+    .contact-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 48px;
+      align-items: start;
+    }
+  }
+
+  .channels {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .channel {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 72px;
+    padding: 14px 18px;
+    border-radius: var(--r-m);
+    border: 1px solid var(--steel);
+    background: var(--graphite);
+    text-decoration: none;
+    transition:
+      border-color 0.2s,
+      transform 0.25s var(--ease);
+  }
+
+  .channel:hover {
+    border-color: var(--mist);
+    transform: translateY(-1px);
+  }
+
+  .channel svg {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    color: var(--gold);
+  }
+
+  .channel-wa svg {
+    color: var(--wa);
+  }
+
+  .channel span {
+    display: grid;
+    gap: 2px;
+  }
+
+  .channel strong {
+    font-weight: 800;
+  }
+
+  .channel span span {
+    color: var(--mist);
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+
+  .channels :global(.contact-business) {
+    margin-top: 12px;
+  }
+
+  .enquiry {
+    display: grid;
+    gap: 18px;
+    padding: clamp(20px, 3vw, 32px);
+    border-radius: var(--r-l);
+    border: 1px solid var(--steel);
+    background: var(--graphite);
+  }
+
+  .enquiry h2 {
+    font-size: var(--step-2);
+  }
+
+  .enquiry .btn {
+    justify-self: start;
+  }
+</style>
+
+<script>
+  import { enquiryText, waUrl } from '../lib/messages';
+  import { config } from '../scripts/config';
+  import { track } from '../scripts/track';
+
+  const form = document.querySelector<HTMLFormElement>('[data-enquiry]');
+  const mobile = (raw: string) => {
+    const digits = raw.replace(/\D/g, '').replace(/^(91|0)(?=\d{10}$)/, '');
+    return /^[6-9]\d{9}$/.test(digits) ? digits : null;
+  };
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const name = String(fd.get('name') ?? '').trim();
+    const phone = mobile(String(fd.get('phone') ?? ''));
+    const message = String(fd.get('message') ?? '').trim();
+    const errors: Record<string, boolean> = { name: !name, phone: !phone, message: !message };
+    let first: HTMLElement | null = null;
+    for (const [key, bad] of Object.entries(errors)) {
+      const msg = form.querySelector<HTMLElement>(`[data-error-for="${key}"]`);
+      const input = form.elements.namedItem(key) as HTMLElement | null;
+      if (msg) msg.hidden = !bad;
+      input?.setAttribute('aria-invalid', String(bad));
+      if (bad && !first) first = input;
+    }
+    if (first) {
+      first.focus();
+      return;
+    }
+    const text = enquiryText({ name, phone: phone!.replace(/(\d{5})(\d{5})/, '$1 $2'), message, product: String(fd.get('product') || '') || null });
+    const link = document.createElement('a');
+    link.href = waUrl(config.whatsapp, text);
+    link.target = '_blank';
+    link.rel = 'noopener';
+    document.body.append(link);
+    link.click();
+    link.remove();
+    track('whatsapp-enquiry');
+  });
+</script>

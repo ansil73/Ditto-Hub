@@ -1,0 +1,204 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { settings } from '../lib/catalog';
+import { waUrl } from '../lib/messages';
+---
+
+<Base title="Your bag" description="Your DITTO HUB bag. Send your order on WhatsApp." noindex>
+  <section class="wrap page-head">
+    <h1 class="page-title">Your bag</h1>
+    <p class="page-lead">Send everything in one WhatsApp message. We confirm stock, delivery and payment in the chat.</p>
+  </section>
+
+  <section class="wrap bag" data-bag aria-live="polite">
+    <p class="note" data-bag-loading>Loading your bag…</p>
+
+    <div class="empty" data-bag-empty hidden>
+      <h2>Your bag is empty</h2>
+      <p>Add products from their pages, then send the whole bag on WhatsApp in one go.</p>
+      <a class="btn btn-gold" href="/shop/">Start shopping</a>
+    </div>
+
+    <div class="bag-layout" data-bag-full hidden>
+      <ul class="bag-list" data-bag-list></ul>
+      <aside class="bag-summary" aria-labelledby="bag-total-title">
+        <h2 id="bag-total-title" class="bag-summary-title">Order summary</h2>
+        <dl class="bag-totals">
+          <div><dt>Items</dt><dd data-bag-items>0</dd></div>
+          <div class="bag-total"><dt>Total</dt><dd class="price" data-bag-total>₹0</dd></div>
+        </dl>
+        <p class="note">Delivery charges, if any, are confirmed on WhatsApp.</p>
+        <a class="btn btn-wa btn-block" href={waUrl(settings.whatsapp, "Hi DITTO HUB! I'd like to order.")} target="_blank" rel="noopener" data-bag-send>
+          <Icon name="chat" />Send order on WhatsApp
+        </a>
+        <button class="btn btn-quiet btn-block btn-sm" type="button" data-bag-clear>Empty the bag</button>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  .bag {
+    padding-bottom: clamp(56px, 8vw, 104px);
+  }
+
+  .bag-layout {
+    display: grid;
+    gap: 24px;
+  }
+
+  @media (min-width: 1000px) {
+    .bag-layout {
+      grid-template-columns: minmax(0, 1fr) 360px;
+      align-items: start;
+      gap: 40px;
+    }
+
+    .bag-summary {
+      position: sticky;
+      top: calc(var(--header-h) + 20px);
+    }
+  }
+
+  .bag-list {
+    display: grid;
+    gap: 12px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .bag-item {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 14px;
+    padding: 12px;
+    border-radius: var(--r-m);
+    border: 1px solid var(--steel);
+    background: var(--graphite);
+  }
+
+  .bag-item img {
+    width: 88px;
+    height: 88px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: var(--graphite-2);
+  }
+
+  .bag-item-body {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .bag-item-name {
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .bag-item-meta {
+    color: var(--mist);
+    font-size: var(--step--1);
+    font-weight: 600;
+  }
+
+  .bag-item-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .qty {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--steel-2);
+    border-radius: 999px;
+  }
+
+  .qty button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: none;
+    color: var(--paper);
+  }
+
+  .qty button svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .qty output {
+    min-width: 24px;
+    text-align: center;
+    font-weight: 800;
+  }
+
+  .bag-remove {
+    border: 0;
+    background: none;
+    color: var(--mist);
+    font-weight: 700;
+    min-height: 44px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bag-gone {
+    color: var(--sale);
+    font-weight: 700;
+    font-size: var(--step--1);
+  }
+
+  .bag-summary {
+    display: grid;
+    gap: 14px;
+    padding: 22px;
+    border-radius: var(--r-l);
+    border: 1px solid var(--steel);
+    background: var(--graphite);
+  }
+
+  .bag-summary-title {
+    font-family: var(--font-body);
+    font-size: var(--step-1);
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+
+  .bag-totals {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .bag-totals div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .bag-totals dt {
+    color: var(--mist);
+    font-weight: 700;
+  }
+
+  .bag-totals dd {
+    margin: 0;
+    font-weight: 800;
+  }
+
+  .bag-total dd {
+    font-size: 1.5rem;
+  }
+</style>
+
+<script>
+  import { initBag } from '../scripts/bag';
+  initBag();
+</script>

@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+import Mark from '../components/Mark.astro';
+---
+
+<Base title="Page not found" description="This page is not on DITTO HUB." noindex>
+  <section class="wrap lost">
+    <Mark variant="spin" class="lost-mark" />
+    <h1 class="page-title">This page is not here</h1>
+    <p class="page-lead">It may have sold out, moved or never existed. Today's drop is a good place to start.</p>
+    <div class="lost-actions">
+      <a class="btn btn-gold" href="/today/">See today's drop</a>
+      <a class="btn btn-ghost" href="/shop/">Shop all</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .lost {
+    display: grid;
+    justify-items: start;
+    gap: 18px;
+    padding-block: clamp(48px, 10vw, 120px);
+  }
+
+  .lost-mark {
+    width: 96px;
+  }
+
+  .lost-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  :global(.sp-hand) {
+    transform-box: view-box;
+    transform-origin: 125px 150px;
+  }
+
+  :global(.sp-hour) {
+    animation: lost-spin 6s linear infinite;
+  }
+
+  :global(.sp-min) {
+    animation: lost-spin 1.2s linear infinite;
+  }
+
+  @keyframes lost-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

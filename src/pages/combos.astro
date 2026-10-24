@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import ComboCard from '../components/ComboCard.astro';
+import HowToOrder from '../components/HowToOrder.astro';
+import CatBanner from '../components/CatBanner.astro';
+import { liveCombos } from '../lib/catalog';
+
+const combos = liveCombos();
+const lead = combos[0]?.items.slice(0, 2).map((p) => p.cutout ?? p.images[0]) ?? [];
+---
+
+<Base title="Combo deals" description="DITTO HUB combo deals: buy two together and pay less. Order the combo on WhatsApp.">
+  <CatBanner word="COMBOS" cutouts={lead}>
+    <nav aria-label="Breadcrumb" class="crumbs">
+      <ol><li><a href="/">Home</a></li><li aria-current="page">Combos</li></ol>
+    </nav>
+    <h1 class="page-title">Combo deals</h1>
+    <p class="page-lead">Buy together and pay less than buying them one by one.</p>
+  </CatBanner>
+  <section class="wrap" style="padding-bottom: clamp(56px, 8vw, 104px)">
+    {
+      combos.length ? (
+        <div class="combos-grid" data-hide-when-empty>
+          {combos.map((c) => <ComboCard combo={c} />)}
+        </div>
+      ) : null
+    }
+    <div class="empty" data-combos-empty hidden={combos.length > 0}>
+      <h2>No combos running right now</h2>
+      <p>New combos are posted in our WhatsApp group first.</p>
+      <a class="btn btn-ghost btn-sm" href="/shop/">Shop all products</a>
+    </div>
+  </section>
+  <HowToOrder />
+</Base>
+
+<script>
+  // When every combo has ended, show the empty message.
+  const grid = document.querySelector<HTMLElement>('.combos-grid');
+  const empty = document.querySelector<HTMLElement>('[data-combos-empty]');
+  const check = () => {
+    if (grid && empty) empty.hidden = !grid.hidden;
+  };
+  check();
+  window.setInterval(check, 30_000);
+</script>

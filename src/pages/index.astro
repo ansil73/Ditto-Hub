@@ -1,0 +1,402 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import Mark from '../components/Mark.astro';
+import ProductCard from '../components/ProductCard.astro';
+import OfferCard from '../components/OfferCard.astro';
+import ComboCard from '../components/ComboCard.astro';
+import HowToOrder from '../components/HowToOrder.astro';
+import {
+  BUILD_NOW,
+  CATEGORIES,
+  featured,
+  getProduct,
+  liveCombos,
+  minPrice,
+  offers,
+  products,
+  reviews,
+  settings,
+  todaysArrivals,
+  view,
+} from '../lib/catalog';
+import { inr, dotDate } from '../lib/format';
+import { TIERS, istDate } from '../lib/pricing';
+import { thumb, srcset } from '../lib/images';
+import { productOrderText, waUrl } from '../lib/messages';
+import '../styles/home.css';
+
+const stages = [
+  { key: 'sneaker', word: 'SNEAKERS', product: featured('sneaker') },
+  { key: 'watch', word: 'WATCHES', product: featured('watch') },
+  { key: 'gadget', word: 'GADGETS', product: featured('gadget') },
+].filter((s) => !!s.product) as { key: string; word: string; product: NonNullable<ReturnType<typeof featured>> }[];
+
+const today = istDate(BUILD_NOW);
+const arrivals = todaysArrivals();
+const todayCount = products.filter((p) => p.arrivalDate === today).length;
+const openOffers = offers
+  .filter((o) => (!o.endsAt || Date.parse(o.endsAt) > BUILD_NOW) && getProduct(o.productId)?.status === 'active')
+  .sort((a, b) => Date.parse(a.endsAt ?? '9999') - Date.parse(b.endsAt ?? '9999'));
+const combos = liveCombos();
+const tiers = TIERS.map((t) => ({
+  ...t,
+  count: products.filter((p) => {
+    const price = view(p).price;
+    return price >= t.min && price <= t.max;
+  }).length,
+}));
+const watchesFrom = minPrice('watches');
+const portals = CATEGORIES.map((c) => {
+  const kind = c.id === 'sneakers' ? 'sneaker' : c.id === 'watches' ? 'watch' : 'gadget';
+  const hero = featured(kind) ?? products.find((p) => p.category === c.id);
+  // A turntable clip plays in the portal when the featured product (or any in the category) has one.
+  const video = hero?.video ?? products.find((p) => p.category === c.id && p.video)?.video ?? null;
+  return { ...c, hero, video, count: products.filter((p) => p.category === c.id).length };
+});
+const generalWa = waUrl(settings.whatsapp, 'Hi DITTO HUB! I want to see today\'s drop.');
+const site = Astro.site ?? new URL('https://ditto-hub.pages.dev');
+const storeLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Store',
+  name: settings.shopName,
+  description: 'Sneakers, watches and new gadgets at budget prices, with All-India delivery.',
+  url: site.href,
+  image: new URL('/og.png', site).href,
+  logo: new URL('/icons/icon-512.png', site).href,
+  telephone: settings.phone,
+  address: { '@type': 'PostalAddress', addressRegion: 'Kerala', addressCountry: 'IN' },
+  sameAs: [`https://www.instagram.com/${settings.instagram}/`],
+};
+---
+
+<Base intro jsonld={[storeLd]}>
+  <!-- 1–2. The Drop Room: 3D hero and the pinned scroll flow -->
+  <section class="drop" data-drop aria-labelledby="drop-title">
+    <div class="drop-track">
+      <div class="drop-stage">
+        <div class="drop-bg" aria-hidden="true"></div>
+        <div class="drop-words" aria-hidden="true">
+          {stages.map((s, i) => <span data-drop-word={i}>{s.word}</span>)}
+        </div>
+        <!-- Desktop spotlight: a soft light follows the cursor and turns the outline words gold. -->
+        <div class="drop-spot" aria-hidden="true"></div>
+        <div class="drop-words drop-words-lit" aria-hidden="true">
+          {stages.map((s, i) => <span data-drop-word={i}>{s.word}</span>)}
+        </div>
+
+        <div class="drop-poster" aria-hidden="true" data-drop-poster>
+          <Mark class="poster-mark" />
+          <div class="poster-podium"><span>DROP · {dotDate(today)}</span></div>
+          {
+            stages.map((s, i) => (
+              <img
+                class="poster-product"
+                data-poster={i}
+                src={s.product.cutout ?? s.product.images[0]}
+                alt=""
+                width="1000"
+                height="1000"
+                loading={i === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                fetchpriority={i === 0 ? 'high' : undefined}
+              />
+            ))
+          }
+        </div>
+        <canvas class="drop-canvas" data-drop-canvas aria-hidden="true"></canvas>
+
+        <div class="wrap drop-copy">
+          <div class="drop-hero" data-drop-hero>
+            <p class="drop-chip">
+              <span class="announce-dot" aria-hidden="true"></span>
+              <span data-arrivals-chip>{todayCount > 0 ? `Updated today · ${todayCount} new arrivals` : 'New arrivals every day'}</span>
+            </p>
+            <h1 class="drop-title" id="drop-title">
+              <span>Luxury looks.</span>
+              <span>Budget prices.</span>
+            </h1>
+            <p class="drop-sub">Sneakers · Watches · Gadgets — delivered across India</p>
+            <div class="drop-ctas">
+              <a class="btn btn-gold" href="/today/">Shop today's drop</a>
+              <a class="btn btn-wa" href={generalWa} target="_blank" rel="noopener" data-track="whatsapp-hero"><Icon name="chat" />Order on WhatsApp</a>
+            </div>
+          </div>
+
+          {
+            stages.map((s, i) => {
+              const v = view(s.product);
+              return (
+                <div
+                  class="drop-panel"
+                  data-drop-panel={i}
+                  data-price-block
+                  data-product-ctx
+                  data-id={s.product.id}
+                  data-name={s.product.name}
+                  data-url={s.product.url}
+                  data-price={s.product.price}
+                  data-mrp={s.product.mrp ?? ''}
+                  inert
+                >
+                  <p class="drop-panel-kicker">Featured {s.key}</p>
+                  <h2 class="drop-panel-name">{s.product.name}</h2>
+                  <div class="price-row">
+                    <span class="visually-hidden">Price</span>
+                    <span class="price js-price">{inr(v.price)}</span>
+                    <span class="mrp js-mrp" hidden={!v.mrp}>
+                      <span class="visually-hidden">MRP </span>
+                      <span class="js-mrp-val">{v.mrp ? inr(v.mrp) : ''}</span>
+                    </span>
+                    <span class="off js-off" hidden={!v.discount}>{v.discount}% off</span>
+                  </div>
+                  <div class="drop-panel-ctas">
+                    <a class="btn btn-gold btn-sm" href={s.product.url}>View {s.key}</a>
+                    <a
+                      class="btn btn-wa btn-sm"
+                      href={waUrl(settings.whatsapp, productOrderText({ id: s.product.id, name: s.product.name, price: v.price }))}
+                      target="_blank"
+                      rel="noopener"
+                      data-wa="product"
+                      data-id={s.product.id}
+                    >
+                      <Icon name="chat" />Order on WhatsApp
+                    </a>
+                  </div>
+                </div>
+              );
+            })
+          }
+        </div>
+
+        <div class="drop-progress" aria-hidden="true">
+          {stages.map((_, i) => <span data-drop-dot={i} />)}
+        </div>
+        <p class="drop-hint" data-drop-hint aria-hidden="true"><span></span>Scroll to explore</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Today's offers -->
+  {
+    openOffers.length > 0 && (
+      <section class="band" aria-labelledby="offers-title" data-hide-when-empty>
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title" id="offers-title">Today's offers</h2>
+              <p class="section-sub">Prices drop for a few hours or days. When the timer ends, the price goes back up.</p>
+            </div>
+            <a class="link-more" href="/today/">All of today's drop<Icon name="arrow" /></a>
+          </div>
+          <div class="hscroll offers-row">
+            {openOffers.map((o) => <OfferCard offer={o} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 4. Shop by budget -->
+  <section class="band band-tight" aria-labelledby="budget-title">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title" id="budget-title">Shop by budget</h2>
+          <p class="section-sub">Pick a price, see everything under it.</p>
+        </div>
+      </div>
+      <div class="budget-grid">
+        {
+          tiers.map((t, i) => (
+            <a class="budget-tile" href={`/shop/?tier=${t.id}`} data-tilt data-reveal>
+              <span class="budget-kicker">{t.id === 'premium' ? 'Premium' : 'Under'}</span>
+              <span class="budget-amount">{t.id === 'premium' ? '₹2,000+' : inr(t.max)}</span>
+              <span class="budget-note">
+                {i === 0 && watchesFrom ? `Watches from ${inr(watchesFrom)}` : `${t.count} ${t.count === 1 ? 'product' : 'products'}`}
+              </span>
+              <Icon name="arrow" class="budget-arrow" />
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Category portals -->
+  <section class="band band-tight" aria-labelledby="cats-title">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title" id="cats-title">Find your thing</h2>
+        </div>
+      </div>
+      <div class="portals">
+        {
+          portals.map((c) => (
+            <a class="portal card" href={`/${c.id}/`} data-tilt data-portal>
+              <div class="portal-media card-media">
+                {c.hero && (
+                  <img
+                    src={thumb(c.hero.images[0], 960)}
+                    srcset={srcset(c.hero.images[0])}
+                    sizes="(min-width: 900px) 33vw, 100vw"
+                    alt=""
+                    width="960"
+                    height="960"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                {c.video && (
+                  <video class="portal-video" muted loop playsinline preload="none" aria-hidden="true" data-portal-video>
+                    <source src={c.video} type={c.video.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+                  </video>
+                )}
+              </div>
+              <div class="portal-text">
+                <h3 class="portal-name">{c.label}</h3>
+                <p class="portal-meta">
+                  {c.blurb} <strong>{c.count} items</strong>
+                </p>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Today's arrivals -->
+  <section class="band" aria-labelledby="arrivals-title">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title" id="arrivals-title" data-arrivals-title data-today="Today's arrivals" data-latest="Latest arrivals">
+            {arrivals.isToday ? "Today's arrivals" : 'Latest arrivals'}
+          </h2>
+          <p class="section-sub">Fresh stock, photographed the day it lands.</p>
+        </div>
+        <a class="link-more" href="/today/">Open today's catalogue<Icon name="arrow" /></a>
+      </div>
+      <div class="grid-products">
+        {products.slice(0, 8).map((p) => <ProductCard product={p} />)}
+      </div>
+      <div class="center-cta">
+        <a class="btn btn-ghost" href="/shop/">See all {products.length} products</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Combo deals -->
+  {
+    combos.length > 0 && (
+      <section class="band band-tight" aria-labelledby="combos-title" data-hide-when-empty>
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title" id="combos-title">Combo deals</h2>
+              <p class="section-sub">Buy together and pay less than buying them one by one.</p>
+            </div>
+            <a class="link-more" href="/combos/">All combos<Icon name="arrow" /></a>
+          </div>
+          <div class="combos-grid">
+            {combos.map((c) => <ComboCard combo={c} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 8. How to order -->
+  <HowToOrder />
+
+  <!-- 9. Customer love (only real photos) -->
+  {
+    reviews.length > 0 && (
+      <section class="band" aria-labelledby="love-title">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title" id="love-title">From our customers</h2>
+            </div>
+          </div>
+          <div class="love-grid">
+            {reviews.map((r) => (
+              <figure class="love-item">
+                <img src={thumb(r.image, 480)} srcset={srcset(r.image)} sizes="(min-width: 900px) 25vw, 50vw" alt={r.caption || 'Customer photo'} loading="lazy" decoding="async" />
+                {r.caption && <figcaption>{r.caption}</figcaption>}
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 10. Instagram strip -->
+  {
+    settings.instaImages.length > 0 && (
+      <section class="band band-tight" aria-labelledby="insta-title">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title" id="insta-title">@{settings.instagram}</h2>
+              <p class="section-sub">Daily drops, unboxings and offers on Instagram.</p>
+            </div>
+            <a class="btn btn-ghost btn-sm" href={`https://www.instagram.com/${settings.instagram}/`} target="_blank" rel="noopener" data-track="instagram-strip">
+              <Icon name="camera" />Follow on Instagram
+            </a>
+          </div>
+          <div class="insta-grid">
+            {settings.instaImages.slice(0, 6).map((src) => (
+              <a class="insta-tile card" href={`https://www.instagram.com/${settings.instagram}/`} target="_blank" rel="noopener" aria-label="Open DITTO HUB on Instagram">
+                <span class="card-media">
+                  <img src={thumb(src, 480)} alt="" width="480" height="480" loading="lazy" decoding="async" />
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 11. Daily drops group -->
+  {
+    settings.whatsappGroup && (
+      <section class="band" aria-labelledby="group-title">
+        <div class="wrap">
+          <div class="group-band">
+            <Mark class="group-mark" />
+            <div class="group-text">
+              <h2 id="group-title">Get new arrivals first</h2>
+              <p>Join our WhatsApp group. We post each day's drop and flash deals there before anywhere else.</p>
+            </div>
+            <a class="btn btn-wa" href={settings.whatsappGroup} target="_blank" rel="noopener" data-track="group-join">
+              <Icon name="users" />Join the daily drops group
+            </a>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <script
+    type="application/json"
+    id="drop-data"
+    set:html={JSON.stringify({
+      date: dotDate(today),
+      mark: '/brand/ditto-hub-mark.svg',
+      products: stages.map((s) => ({ id: s.product.id, cutout: s.product.cutout ?? s.product.images[0], model: s.product.model })),
+    })}
+  />
+  <script>
+    import { initDrop } from '../scripts/drop';
+    import { initTilt } from '../scripts/tilt';
+    import { initPortalVideos } from '../scripts/portals';
+    initDrop();
+    initTilt();
+    initPortalVideos();
+  </script>
+</Base>

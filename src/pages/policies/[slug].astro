@@ -1,0 +1,48 @@
+---
+import Base from '../../layouts/Base.astro';
+import BusinessDetails from '../../components/BusinessDetails.astro';
+
+interface PolicyModule {
+  frontmatter: { title: string; updated?: string };
+  Content: (props: Record<string, unknown>) => unknown;
+}
+
+export function getStaticPaths() {
+  const files = import.meta.glob<PolicyModule>('../../content/policies/*.md', { eager: true });
+  return Object.entries(files).map(([path, mod]) => ({
+    params: { slug: path.split('/').pop()!.replace(/\.md$/, '') },
+    props: { mod },
+  }));
+}
+
+const { mod } = Astro.props as { mod: PolicyModule };
+const { Content, frontmatter } = mod;
+---
+
+<Base title={frontmatter.title} description={`${frontmatter.title} at DITTO HUB.`}>
+  <section class="wrap page-head">
+    <nav aria-label="Breadcrumb" class="crumbs">
+      <ol><li><a href="/">Home</a></li><li aria-current="page">{frontmatter.title}</li></ol>
+    </nav>
+    <h1 class="page-title">{frontmatter.title}</h1>
+    {frontmatter.updated && <p class="note">Last updated {frontmatter.updated}</p>}
+  </section>
+  <section class="wrap" style="padding-bottom: clamp(56px, 8vw, 104px)">
+    <div class="prose">
+      <Content />
+    </div>
+    <h2 class="policy-contact-title">Who runs this shop</h2>
+    <BusinessDetails class="policy-business" />
+  </section>
+</Base>
+
+<style>
+  .policy-contact-title {
+    margin: 40px 0 14px;
+    font-size: var(--step-2);
+  }
+
+  :global(.policy-business) {
+    max-width: 68ch;
+  }
+</style>

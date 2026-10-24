@@ -1,0 +1,701 @@
+/* Home page: the Drop Room and the sections under it. */
+
+/* ------------------------------------------------------------------ Drop Room */
+.drop {
+  position: relative;
+  --drop-x: 50%;
+  --drop-y: 38%;
+}
+
+.drop-track {
+  position: relative;
+  height: 400vh;
+  height: 400svh;
+}
+
+.drop-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.drop-bg,
+.drop-words,
+.drop-spot,
+.drop-poster,
+.drop-canvas,
+.drop-copy {
+  position: absolute;
+  inset: 0;
+}
+
+.drop-bg {
+  z-index: 0;
+  background:
+    radial-gradient(42% 36% at var(--drop-x) var(--drop-y), rgba(217, 176, 97, 0.2), transparent 70%),
+    radial-gradient(70% 55% at var(--drop-x) 92%, rgba(217, 176, 97, 0.08), transparent 70%),
+    radial-gradient(120% 90% at 50% 40%, var(--graphite) 0%, var(--ink) 65%);
+}
+
+.drop-words {
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.drop-words span {
+  grid-area: 1 / 1;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(4.5rem, 21vw, 19rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(244, 242, 238, 0.13);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(var(--drop-word-y, -6%));
+  will-change: transform, opacity;
+}
+
+/* Desktop spotlight: a warm pool of light follows the cursor, and inside it the
+   outline words turn gold. Hidden on touch screens. */
+.drop-spot {
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 340px at var(--sx, 50%) var(--sy, 40%),
+    rgba(243, 213, 140, 0.15),
+    rgba(217, 176, 97, 0.05) 45%,
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+}
+
+.drop-words-lit {
+  -webkit-mask-image: radial-gradient(circle 280px at var(--sx, 50%) var(--sy, 40%), #000, rgba(0, 0, 0, 0.5) 45%, transparent 75%);
+  mask-image: radial-gradient(circle 280px at var(--sx, 50%) var(--sy, 40%), #000, rgba(0, 0, 0, 0.5) 45%, transparent 75%);
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+}
+
+.drop-words-lit span {
+  -webkit-text-stroke: 1.5px var(--gold-light);
+}
+
+.drop-stage.is-spot .drop-spot,
+.drop-stage.is-spot .drop-words-lit {
+  opacity: 1;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .drop-spot,
+  .drop-words-lit {
+    display: none;
+  }
+}
+
+.drop-poster {
+  z-index: 2;
+  pointer-events: none;
+  transition:
+    opacity 0.8s var(--ease),
+    visibility 0.8s;
+}
+
+.poster-mark {
+  position: absolute;
+  left: var(--drop-x);
+  top: calc(var(--drop-y) - 4%);
+  width: min(44vh, 400px);
+  transform: translate(-50%, -50%);
+  opacity: 0.24;
+  filter: drop-shadow(0 0 70px rgba(217, 176, 97, 0.45));
+}
+
+.poster-podium {
+  position: absolute;
+  left: var(--drop-x);
+  top: calc(var(--drop-y) + 22vh);
+  width: min(78vw, 540px);
+  aspect-ratio: 5 / 1.05;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 28%, var(--steel) 0%, var(--graphite) 52%, var(--ink) 100%);
+  border-top: 2px solid rgba(217, 176, 97, 0.65);
+  box-shadow:
+    0 40px 80px -24px #000,
+    inset 0 3px 0 rgba(243, 213, 140, 0.25);
+}
+
+.poster-podium span {
+  position: absolute;
+  inset: auto 0 16%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(0.6rem, 1.6vw, 0.8rem);
+  letter-spacing: 0.32em;
+  color: rgba(217, 176, 97, 0.8);
+}
+
+.poster-product {
+  position: absolute;
+  left: var(--drop-x);
+  top: var(--drop-y);
+  width: min(54vh, 460px, 86vw);
+  transform: translate(-50%, -50%) translateY(var(--rise, 24px)) scale(var(--scale, 0.94));
+  opacity: var(--show, 0);
+  filter: drop-shadow(0 34px 32px rgba(0, 0, 0, 0.65));
+  will-change: transform, opacity;
+}
+
+.poster-product[data-poster='0'] {
+  --show: 1;
+  --rise: 0px;
+  --scale: 1;
+}
+
+.drop-canvas {
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s var(--ease);
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.drop-canvas:active {
+  cursor: grabbing;
+}
+
+.drop.is-3d .drop-canvas {
+  opacity: 1;
+}
+
+.drop.is-3d .drop-poster {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.drop-copy {
+  z-index: 4;
+  display: grid;
+  align-content: end;
+  padding-bottom: calc(clamp(28px, 7vh, 88px) + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+}
+
+.drop-copy::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 58%;
+  background: linear-gradient(180deg, transparent, rgba(10, 10, 11, 0.86) 62%, var(--ink));
+  pointer-events: none;
+  z-index: -1;
+}
+
+.drop-hero,
+.drop-panel {
+  grid-area: 1 / 1;
+  display: grid;
+  align-content: end;
+  gap: 16px;
+  max-width: 640px;
+  pointer-events: auto;
+  will-change: transform, opacity;
+}
+
+.drop-panel {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.drop-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--steel-2);
+  background: rgba(20, 21, 24, 0.7);
+  backdrop-filter: blur(8px);
+  font-size: var(--step--1);
+  font-weight: 700;
+}
+
+.drop-title {
+  display: grid;
+  font-size: var(--step-5);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.drop-sub {
+  color: rgba(244, 242, 238, 0.86);
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+
+.drop-ctas,
+.drop-panel-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.drop-panel-kicker {
+  color: var(--gold);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.drop-panel-name {
+  font-size: var(--step-4);
+  font-weight: 800;
+  line-height: 0.95;
+}
+
+.drop-panel .price {
+  font-size: clamp(1.6rem, 1.2rem + 2vw, 2.6rem);
+}
+
+.drop-progress {
+  position: absolute;
+  z-index: 5;
+  right: calc(18px + env(safe-area-inset-right, 0px));
+  top: 50%;
+  display: grid;
+  gap: 10px;
+  transform: translateY(-50%);
+}
+
+.drop-progress span {
+  width: 4px;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--steel-2);
+  transition:
+    background-color 0.3s,
+    height 0.3s var(--ease);
+}
+
+.drop-progress span.is-on {
+  height: 42px;
+  background: var(--gold);
+}
+
+.drop-hint {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  display: none;
+  align-items: center;
+  gap: 10px;
+  transform: translateX(-50%);
+  color: var(--mist);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.drop-hint span {
+  position: relative;
+  width: 1px;
+  height: 28px;
+  background: var(--steel-2);
+  overflow: hidden;
+}
+
+.drop-hint span::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 12px;
+  background: var(--gold);
+  animation: hint-line 1.8s var(--ease) infinite;
+}
+
+@keyframes hint-line {
+  from {
+    top: -12px;
+  }
+  to {
+    top: 28px;
+  }
+}
+
+@media (max-width: 899px) {
+  .drop-copy .drop-hero .btn,
+  .drop-panel .btn {
+    flex: 1 1 auto;
+  }
+
+  .drop-progress {
+    top: 36%;
+  }
+}
+
+@media (min-width: 900px) {
+  .drop {
+    --drop-x: 68%;
+    --drop-y: 46%;
+  }
+
+  .drop-copy {
+    align-content: center;
+    padding-bottom: 0;
+  }
+
+  .drop-copy::before {
+    inset: 0 auto 0 0;
+    width: 55%;
+    height: auto;
+    background: linear-gradient(90deg, rgba(10, 10, 11, 0.85), transparent);
+  }
+
+  .drop-hero,
+  .drop-panel {
+    max-width: min(560px, 46vw);
+  }
+
+  .drop-hint {
+    display: inline-flex;
+  }
+
+  .poster-podium {
+    top: calc(var(--drop-y) + 20vh);
+  }
+}
+
+/* Short laptop screens: keep the title from crowding the header */
+@media (min-width: 900px) and (max-height: 700px) {
+  .drop-title {
+    font-size: clamp(2.4rem, 5.6vw, 4.4rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop-track {
+    height: auto;
+  }
+
+  .drop-stage {
+    position: relative;
+    height: 100svh;
+  }
+
+  .drop-panel,
+  .drop-progress,
+  .drop-hint,
+  .drop-words,
+  .drop-spot {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ offers row */
+.offers-row {
+  margin-inline: calc(var(--gutter-l) * -1) calc(var(--gutter-r) * -1);
+  padding-inline: var(--gutter-l) var(--gutter-r);
+}
+
+/* ------------------------------------------------------------------ budget tiles */
+.budget-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  perspective: 900px;
+}
+
+@media (min-width: 900px) {
+  .budget-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+.budget-tile {
+  position: relative;
+  display: grid;
+  align-content: end;
+  gap: 6px;
+  min-height: clamp(150px, 20vw, 220px);
+  padding: 20px;
+  border-radius: var(--r-l);
+  border: 1px solid var(--steel);
+  background:
+    radial-gradient(120% 110% at 100% 0%, rgba(217, 176, 97, 0.16), transparent 55%),
+    var(--graphite);
+  text-decoration: none;
+  overflow: hidden;
+  container-type: inline-size;
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition:
+    border-color 0.3s,
+    transform 0.4s var(--ease-out);
+}
+
+.budget-tile:hover,
+.budget-tile.is-lit {
+  border-color: rgba(217, 176, 97, 0.6);
+}
+
+.budget-kicker {
+  color: var(--mist);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.budget-amount {
+  font-family: var(--font-display);
+  font-weight: 800;
+  /* Sized to the tile, so "₹2,000+" fits on a 360 px phone. */
+  font-size: clamp(1.2rem, 19cqi, 3.1rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1.4px var(--gold);
+  transition: color 0.35s var(--ease);
+}
+
+.budget-tile:hover .budget-amount,
+.budget-tile.is-lit .budget-amount {
+  color: var(--gold);
+}
+
+.budget-note {
+  color: var(--mist);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.budget-arrow {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 22px;
+  height: 22px;
+  color: var(--gold);
+  transition: transform 0.3s var(--ease);
+}
+
+.budget-tile:hover .budget-arrow {
+  transform: translateX(4px);
+}
+
+/* ------------------------------------------------------------------ category portals */
+.portals {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 900px) {
+  .portals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    perspective: 1200px;
+  }
+}
+
+.portal {
+  position: relative;
+  display: block;
+  border-radius: var(--r-l);
+  overflow: hidden;
+  text-decoration: none;
+  transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.45s var(--ease-out);
+}
+
+.portal-media {
+  aspect-ratio: 16 / 11;
+  border-radius: var(--r-l);
+}
+
+/* Turntable clip (when a product in the category has one) fades in over the photo while it plays. */
+.portal-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+}
+
+.portal.is-playing .portal-video {
+  opacity: 1;
+}
+
+@media (min-width: 900px) {
+  .portal-media {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+.portal-text {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: grid;
+  gap: 6px;
+  padding: 22px;
+  background: linear-gradient(180deg, transparent, rgba(10, 10, 11, 0.9) 70%);
+}
+
+.portal-name {
+  font-size: var(--step-3);
+  font-weight: 800;
+}
+
+.portal-meta {
+  color: rgba(244, 242, 238, 0.86);
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.portal-meta strong {
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ arrivals, love, insta, group */
+.center-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(28px, 4vw, 44px);
+}
+
+.love-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 900px) {
+  .love-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.love-item {
+  display: grid;
+  gap: 8px;
+}
+
+.love-item img {
+  border-radius: var(--r-m);
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  width: 100%;
+}
+
+.love-item figcaption {
+  color: var(--mist);
+  font-size: var(--step--1);
+}
+
+.insta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 900px) {
+  .insta-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+.insta-tile .card-media {
+  display: block;
+  border-radius: 14px;
+}
+
+.group-band {
+  display: grid;
+  gap: 20px;
+  align-items: center;
+  padding: clamp(24px, 4vw, 44px);
+  border-radius: var(--r-l);
+  border: 1px solid rgba(217, 176, 97, 0.35);
+  background:
+    radial-gradient(80% 140% at 0% 0%, rgba(217, 176, 97, 0.16), transparent 60%),
+    var(--graphite);
+}
+
+@media (min-width: 900px) {
+  .group-band {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 32px;
+  }
+}
+
+.group-mark {
+  width: 64px;
+}
+
+.group-text {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.group-text h2 {
+  font-size: var(--step-3);
+}
+
+.group-text p {
+  color: var(--mist);
+  max-width: 56ch;
+}
+
+/* Floating contact button steps aside while the Drop Room fills the screen on phones. */
+@media (max-width: 899px) {
+  .float-contact {
+    transition:
+      opacity 0.3s var(--ease),
+      transform 0.3s var(--ease);
+  }
+
+  .drop-in-view .float-contact {
+    opacity: 0;
+    transform: translateY(16px);
+    pointer-events: none;
+  }
+}
+
+/* Lenis smooth scrolling (desktop) */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}

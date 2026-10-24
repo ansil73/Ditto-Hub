@@ -1,0 +1,405 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { allProducts, products, settings, view, BUILD_NOW, type Product } from '../../lib/catalog';
+import { inr } from '../../lib/format';
+import { arrivalBadge, countdown } from '../../lib/pricing';
+import { thumb, srcset } from '../../lib/images';
+import { typeLabel } from '../../lib/labels';
+import { productOrderText, restockText, telUrl, prettyPhone, waUrl } from '../../lib/messages';
+import '../../styles/product.css';
+
+export function getStaticPaths() {
+  return allProducts.filter((p) => p.status !== 'hidden').map((p) => ({ params: { id: p.id }, props: { product: p } }));
+}
+
+const { product: p } = Astro.props as { product: Product };
+const site = Astro.site ?? new URL('https://ditto-hub.pages.dev');
+const archived = p.status === 'archived';
+const v = view(p);
+const sold = v.stock.key === 'sold';
+const badge = arrivalBadge(p.arrivalDate, BUILD_NOW);
+const label = typeLabel(p.category, p.type);
+const url = new URL(p.url, site).href;
+const needsSize = p.sizes.length > 0;
+const spinFrames = p.spinFrames > 1 ? Array.from({ length: p.spinFrames }, (_, i) => `/products/${p.id}/spin/${String(i + 1).padStart(2, '0')}.webp`) : [];
+const tabs = [
+  { id: 'photos', label: 'Photos', icon: 'zoom' as const, show: true },
+  { id: '3d', label: '3D', icon: 'cube' as const, show: !!p.model },
+  { id: 'spin', label: '360°', icon: 'spin' as const, show: spinFrames.length > 0 },
+  { id: 'video', label: 'Video', icon: 'play' as const, show: !!p.video },
+].filter((t) => t.show);
+
+const similar = products
+  .filter((x) => x.id !== p.id)
+  .map((x) => ({ x, score: (x.category === p.category ? 0 : 100000) + Math.abs(view(x).price - v.price) }))
+  .sort((a, b) => a.score - b.score)
+  .slice(0, 4)
+  .map((s) => s.x);
+
+const msgItem = { id: p.id, name: p.name, price: v.price, url };
+const orderWa = waUrl(settings.whatsapp, productOrderText(msgItem));
+const restockWa = waUrl(settings.whatsapp, restockText(msgItem));
+const offerEnds = v.offer?.endsAt ?? null;
+
+const productLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: p.name,
+  sku: p.id,
+  description: p.description || `${p.name} — ${label} from DITTO HUB.`,
+  image: p.images.map((src) => new URL(src, site).href),
+  color: p.colours[0],
+  offers: {
+    '@type': 'Offer',
+    url,
+    priceCurrency: 'INR',
+    price: v.price,
+    ...(offerEnds ? { priceValidUntil: offerEnds.slice(0, 10) } : {}),
+    availability: archived || sold ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+    seller: { '@type': 'Organization', name: settings.shopName },
+  },
+};
+const crumbsLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: site.href },
+    { '@type': 'ListItem', position: 2, name: p.categoryLabel, item: new URL(`/${p.category}/`, site).href },
+    { '@type': 'ListItem', position: 3, name: p.name, item: url },
+  ],
+};
+const description = `${p.name}, ${label.toLowerCase()} for ${inr(v.price)}${v.mrp ? ` (MRP ${inr(v.mrp)})` : ''}. ${p.description} Order on WhatsApp, All-India delivery.`.trim();
+---
+
+<Base title={p.name} description={description} image={p.images[0]} jsonld={archived ? [crumbsLd] : [productLd, crumbsLd]} bodyClass={archived ? undefined : 'has-action-bar'} noindex={archived}>
+  <div class="wrap pdp">
+    <nav aria-label="Breadcrumb" class="crumbs pdp-crumbs">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href={`/${p.category}/`}>{p.categoryLabel}</a></li>
+        <li aria-current="page">{p.name}</li>
+      </ol>
+    </nav>
+
+    <div class="pdp-grid">
+      <!-- Media -->
+      <section class="pdp-media" aria-label={`${p.name} photos`}>
+        {
+          tabs.length > 1 && (
+            <div class="media-tabs" role="tablist" aria-label="Ways to view this product">
+              {tabs.map((t, i) => (
+                <button class="chip" type="button" role="tab" id={`tab-${t.id}`} aria-controls={`panel-${t.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-tab={t.id}>
+                  <Icon name={t.icon} />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )
+        }
+        <div class="media-panel" id="panel-photos" role={tabs.length > 1 ? 'tabpanel' : undefined} aria-labelledby={tabs.length > 1 ? 'tab-photos' : undefined} data-panel="photos">
+          <div class="gallery" data-gallery tabindex="0" aria-label="Photos. Swipe or use arrow keys.">
+            {
+              p.images.map((src, i) => (
+                <figure class="slide" data-slide={i}>
+                  <button class="slide-btn" type="button" data-zoom={i} aria-label={`Open photo ${i + 1} of ${p.images.length} full screen`}>
+                    <img
+                      src={thumb(src, 960)}
+                      srcset={srcset(src)}
+                      sizes="(min-width: 1080px) 640px, 100vw"
+                      alt={i === 0 ? `${p.name}${p.colours[0] ? `, ${p.colours[0]}` : ''}` : `${p.name}, photo ${i + 1}`}
+                      width="960"
+                      height="960"
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      fetchpriority={i === 0 ? 'high' : undefined}
+                      decoding="async"
+                    />
+                  </button>
+                </figure>
+              ))
+            }
+          </div>
+          <div class="gallery-badges">
+            <span class="badge badge-today js-arrival" data-kind="today" hidden={badge !== 'today'}>TODAY</span>
+            <span class="badge badge-new js-arrival" data-kind="new" hidden={badge !== 'new'}>NEW</span>
+            {p.sample && <span class="badge badge-sample">Sample photo</span>}
+          </div>
+          {
+            p.images.length > 1 && (
+              <div class="thumbs" role="group" aria-label="Choose a photo">
+                {p.images.map((src, i) => (
+                  <button class="thumb" type="button" data-thumb={i} aria-label={`Show photo ${i + 1}`} aria-current={i === 0 ? 'true' : undefined}>
+                    <img src={thumb(src, 480)} alt="" width="96" height="96" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            )
+          }
+        </div>
+        {
+          p.model && (
+            <div class="media-panel" id="panel-3d" role="tabpanel" aria-labelledby="tab-3d" data-panel="3d" data-model={p.model} data-poster={p.images[0]} hidden>
+              <div class="model-box" data-model-box>
+                <p class="note">Loading 3D view…</p>
+              </div>
+              <p class="note">Drag to turn, pinch to zoom. On a phone, tap the cube icon to see it in your room.</p>
+            </div>
+          )
+        }
+        {
+          spinFrames.length > 0 && (
+            <div class="media-panel" id="panel-spin" role="tabpanel" aria-labelledby="tab-spin" data-panel="spin" hidden>
+              <div class="spin" data-spin data-frames={JSON.stringify(spinFrames)} tabindex="0" aria-label="360 degree view. Drag or use arrow keys to turn.">
+                <img src={spinFrames[0]} alt={`${p.name}, turning view`} width="960" height="960" draggable="false" />
+              </div>
+              <p class="note">Drag sideways to turn it.</p>
+            </div>
+          )
+        }
+        {
+          p.video && (
+            <div class="media-panel" id="panel-video" role="tabpanel" aria-labelledby="tab-video" data-panel="video" hidden>
+              <video class="pdp-video" src={p.video} poster={thumb(p.images[0], 960)} controls muted loop playsinline preload="none" />
+            </div>
+          )
+        }
+      </section>
+
+      <!-- Details and actions -->
+      <section
+        class="pdp-info"
+        aria-labelledby="pdp-name"
+        data-product-ctx
+        data-price-block
+        data-id={p.id}
+        data-name={p.name}
+        data-url={p.url}
+        data-price={p.price}
+        data-mrp={p.mrp ?? ''}
+        data-arrival={p.arrivalDate}
+      >
+        <p class="pdp-type">{label} <span class="pdp-id">ID {p.id}</span></p>
+        <h1 class="pdp-name" id="pdp-name">{p.name}</h1>
+
+        {
+          archived ? (
+            <div class="empty pdp-gone">
+              <h2>No longer available</h2>
+              <p>This product has sold out for good. Here are similar ones you can order today.</p>
+              <a class="btn btn-gold btn-sm" href={`/${p.category}/`}>
+                See all {p.categoryLabel.toLowerCase()}
+              </a>
+            </div>
+          ) : (
+            <>
+              <div class="price-row pdp-price">
+                <span class="visually-hidden">Price</span>
+                <span class="price js-price">{inr(v.price)}</span>
+                <span class="mrp js-mrp" hidden={!v.mrp}>
+                  <span class="visually-hidden">MRP </span>
+                  <span class="js-mrp-val">{v.mrp ? inr(v.mrp) : ''}</span>
+                </span>
+                <span class="off js-off" hidden={!v.discount}>
+                  {v.discount}% off
+                </span>
+              </div>
+              <p class="pdp-offer js-offer" hidden={!v.offer}>
+                <Icon name="clock" />
+                <span class="js-offer-label">{v.offer?.label || 'Offer'}</span>
+                <span class="js-offer-ends" hidden={!offerEnds}>
+                  ends in <span class="countdown" data-countdown data-ends={offerEnds ?? undefined}>{offerEnds ? countdown(offerEnds) : ''}</span>
+                </span>
+              </p>
+              <p class="stock pdp-stock" data-state={v.stock.key}>{v.stock.label}</p>
+
+              <form class="pdp-form" data-buy data-id={p.id} data-needs-size={needsSize ? 'true' : 'false'} data-colour={p.colours[0] ?? ''}>
+                {needsSize && (
+                  <fieldset class="pdp-field" data-size-group>
+                    <legend>Size (UK)</legend>
+                    <div class="chip-row">
+                      {p.sizes.map((s) => (
+                        <label>
+                          <input class="visually-hidden" type="radio" name="size" value={s.size} disabled={s.stock <= 0} />
+                          <span class="chip" title={s.stock <= 0 ? 'Sold out in this size' : undefined}>
+                            {s.size.replace(/^UK\s*/i, '')}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    <p class="field-error" data-size-error hidden>
+                      Choose your size to continue.
+                    </p>
+                    <p class="note">Crossed-out sizes are sold out. Not sure? Ask us on WhatsApp.</p>
+                  </fieldset>
+                )}
+                {p.colours.length > 1 ? (
+                  <fieldset class="pdp-field">
+                    <legend>Colour</legend>
+                    <div class="chip-row">
+                      {p.colours.map((c, i) => (
+                        <label>
+                          <input class="visually-hidden" type="radio" name="colour" value={c} checked={i === 0} />
+                          <span class="chip">{c}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                ) : (
+                  p.colours[0] && (
+                    <p class="pdp-colour">
+                      Colour: <strong>{p.colours[0]}</strong>
+                    </p>
+                  )
+                )}
+
+                <div class="pdp-actions" data-main-actions>
+                  {sold ? (
+                    <a class="btn btn-wa btn-block" href={restockWa} target="_blank" rel="noopener" data-wa="restock" data-id={p.id}>
+                      <Icon name="chat" />
+                      Ask for restock
+                    </a>
+                  ) : (
+                    <>
+                      <a class="btn btn-wa btn-block" href={orderWa} target="_blank" rel="noopener" data-wa="product" data-id={p.id}>
+                        <Icon name="chat" />
+                        Order on WhatsApp
+                      </a>
+                      <button class="btn btn-ghost btn-block" type="button" data-add-bag data-id={p.id}>
+                        <Icon name="bag" />
+                        Add to bag
+                      </button>
+                    </>
+                  )}
+                </div>
+              </form>
+
+              <div class="pdp-secondary">
+                <a class="btn btn-quiet btn-sm" href={`https://ig.me/m/${settings.instagram}`} target="_blank" rel="noopener" data-ig data-id={p.id}>
+                  <Icon name="camera" />
+                  Ask on Instagram
+                </a>
+                <a class="btn btn-quiet btn-sm" href={telUrl(settings.phone)} data-track="call-product" data-id={p.id}>
+                  <Icon name="phone" />
+                  Call {prettyPhone(settings.phone)}
+                </a>
+                <button class="btn btn-quiet btn-sm" type="button" data-share={p.url} data-share-title={p.name} data-share-text={`${p.name} at DITTO HUB`} data-id={p.id}>
+                  <Icon name="share" />
+                  Share
+                </button>
+                <button class="heart-btn pdp-heart" type="button" data-wish={p.id} aria-pressed="false" aria-label={`Save ${p.name} to wishlist`}>
+                  <Icon name="heart" />
+                </button>
+              </div>
+            </>
+          )
+        }
+
+        <div class="pdp-details">
+          {p.description && <p class="pdp-desc">{p.description}</p>}
+          {
+            p.highlights.length > 0 && (
+              <ul class="pdp-highlights">
+                {p.highlights.map((h) => (
+                  <li>
+                    <Icon name="check" />
+                    {h}
+                  </li>
+                ))}
+              </ul>
+            )
+          }
+          <dl class="pdp-facts">
+            {
+              p.inBox && (
+                <div>
+                  <dt>In the box</dt>
+                  <dd>{p.inBox}</dd>
+                </div>
+              )
+            }
+            <div>
+              <dt>Delivery</dt>
+              <dd>{settings.deliveryText}. We share tracking once it ships.</dd>
+            </div>
+            <div>
+              <dt>Cash on delivery</dt>
+              <dd>{settings.cod ? 'Available. We confirm it on WhatsApp.' : 'Not available. We share payment details on WhatsApp.'}</dd>
+            </div>
+            <div>
+              <dt>Returns</dt>
+              <dd><a href="/policies/returns/">See returns and exchange</a></dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  {
+    similar.length > 0 && (
+      <section class="band" aria-labelledby="similar-title">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title" id="similar-title">
+                {archived ? 'Order one of these instead' : 'You may also like'}
+              </h2>
+            </div>
+            <a class="link-more" href={`/${p.category}/`}>
+              More {p.categoryLabel.toLowerCase()}
+              <Icon name="arrow" />
+            </a>
+          </div>
+          <div class="grid-products">
+            {similar.map((x) => (
+              <ProductCard product={x} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    !archived && (
+      <div class="action-bar" data-action-bar data-product-ctx data-price-block data-id={p.id} data-name={p.name} data-url={p.url} data-price={p.price} data-mrp={p.mrp ?? ''}>
+        <div class="action-bar-price">
+          <span class="price js-price">{inr(v.price)}</span>
+          <span class="mrp js-mrp" hidden={!v.mrp}>
+            <span class="visually-hidden">MRP </span>
+            <span class="js-mrp-val">{v.mrp ? inr(v.mrp) : ''}</span>
+          </span>
+        </div>
+        {sold ? (
+          <a class="btn btn-wa btn-sm" href={restockWa} target="_blank" rel="noopener" data-wa="restock" data-id={p.id}>
+            Ask for restock
+          </a>
+        ) : (
+          <a class="btn btn-wa btn-sm" href={orderWa} target="_blank" rel="noopener" data-wa="product" data-id={p.id}>
+            <Icon name="chat" />
+            Order on WhatsApp
+          </a>
+        )}
+      </div>
+    )
+  }
+
+  <dialog class="lightbox" data-lightbox aria-label="Photo viewer" data-lenis-prevent>
+    <div class="lightbox-stage" data-lightbox-stage>
+      <img data-lightbox-img alt="" />
+    </div>
+    <div class="lightbox-bar">
+      <button class="icon-btn" type="button" data-lightbox-prev aria-label="Previous photo"><Icon name="back" /></button>
+      <p class="lightbox-count" data-lightbox-count></p>
+      <button class="icon-btn" type="button" data-lightbox-next aria-label="Next photo"><Icon name="arrow" /></button>
+      <button class="icon-btn" type="button" data-lightbox-close aria-label="Close photo viewer"><Icon name="close" /></button>
+    </div>
+  </dialog>
+
+  <script type="application/json" id="pdp-data" set:html={JSON.stringify({ images: p.images, name: p.name })} />
+  <script>
+    import { initProduct } from '../../scripts/product';
+    initProduct();
+  </script>
+</Base>

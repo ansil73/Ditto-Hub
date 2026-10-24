@@ -1,0 +1,165 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import ProductCard from '../components/ProductCard.astro';
+import OfferCard from '../components/OfferCard.astro';
+import ComboCard from '../components/ComboCard.astro';
+import { BUILD_NOW, getProduct, liveCombos, offers, products, settings } from '../lib/catalog';
+import { istDate } from '../lib/pricing';
+import { prettyPhone } from '../lib/messages';
+
+const today = istDate(BUILD_NOW);
+const latest = products.slice(0, 12);
+const anyToday = latest.some((p) => p.arrivalDate === today);
+const openOffers = offers
+  .filter((o) => (!o.endsAt || Date.parse(o.endsAt) > BUILD_NOW) && getProduct(o.productId)?.status === 'active')
+  .sort((a, b) => Date.parse(a.endsAt ?? '9999') - Date.parse(b.endsAt ?? '9999'));
+const combos = liveCombos();
+const niceDate = new Intl.DateTimeFormat('en-IN', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Kolkata' }).format(BUILD_NOW);
+---
+
+<Base title="Today's drop" description="Today's new arrivals and offers at DITTO HUB, with prices. Share the catalogue or order on WhatsApp.">
+  <section class="wrap page-head today-head">
+    <div class="print-only print-brand">
+      <img src="/brand/ditto-hub-logo-tagline-light.svg" alt="DITTO HUB" width="300" height="80" />
+      <p>WhatsApp {settings.whatsapp.slice(-10, -5)} {settings.whatsapp.slice(-5)} · Call {prettyPhone(settings.phone)} · Instagram @{settings.instagram}</p>
+    </div>
+    <nav aria-label="Breadcrumb" class="crumbs no-print">
+      <ol><li><a href="/">Home</a></li><li aria-current="page">Today's drop</li></ol>
+    </nav>
+    <h1 class="page-title">Today's drop</h1>
+    <p class="page-lead"><span data-today-date>{niceDate}</span>. New arrivals and running offers, with prices.</p>
+    <div class="today-actions no-print">
+      <button class="btn btn-gold" type="button" data-share="/today/" data-share-title="Today's drop at DITTO HUB" data-share-text="Today's new arrivals and offers at DITTO HUB">
+        <Icon name="share" />Share today's catalogue
+      </button>
+      <button class="btn btn-ghost" type="button" data-print hidden>
+        <Icon name="download" />Save as PDF
+      </button>
+    </div>
+  </section>
+
+  {
+    openOffers.length > 0 && (
+      <section class="band band-tight" aria-labelledby="t-offers" data-hide-when-empty>
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title" id="t-offers">Today's offers</h2>
+            </div>
+          </div>
+          <div class="grid-offers">
+            {openOffers.map((o) => <OfferCard offer={o} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="band band-tight" aria-labelledby="t-arrivals">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title" id="t-arrivals" data-today-title data-today="Today's arrivals" data-latest="Latest arrivals">
+            {anyToday ? "Today's arrivals" : 'Latest arrivals'}
+          </h2>
+          <p class="section-sub" data-today-sub hidden={anyToday}>No new arrivals yet today. Here is what came in most recently.</p>
+        </div>
+      </div>
+      <div class="grid-products" data-today-grid>
+        {latest.map((p) => <ProductCard product={p} />)}
+      </div>
+    </div>
+  </section>
+
+  {
+    combos.length > 0 && (
+      <section class="band band-tight" aria-labelledby="t-combos" data-hide-when-empty>
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title" id="t-combos">Combo deals</h2>
+            </div>
+          </div>
+          <div class="combos-grid">
+            {combos.map((c) => <ComboCard combo={c} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .today-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .grid-offers {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: 16px;
+  }
+
+  .print-brand {
+    margin-bottom: 12px;
+  }
+
+  .print-brand img {
+    width: 260px;
+  }
+
+  @media print {
+    .grid-offers {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    :global(.offer-card),
+    :global(.combo-card) {
+      background: #fff !important;
+      border-color: #ddd !important;
+      break-inside: avoid;
+    }
+
+    :global(.offer-card .btn),
+    :global(.combo-card .btn),
+    :global(.card-heart) {
+      display: none !important;
+    }
+
+    :global(.page-title),
+    :global(.section-title) {
+      color: #111 !important;
+    }
+  }
+</style>
+
+<script>
+  import { istDate } from '../lib/pricing';
+  import { config } from '../scripts/config';
+
+  // Show only today's arrivals when there are any; otherwise the latest ones.
+  const grid = document.querySelector<HTMLElement>('[data-today-grid]');
+  const title = document.querySelector<HTMLElement>('[data-today-title]');
+  const sub = document.querySelector<HTMLElement>('[data-today-sub]');
+  const today = istDate();
+  const cards = [...(grid?.querySelectorAll<HTMLElement>('[data-card]') ?? [])];
+  const todays = cards.filter((c) => c.dataset.arrival === today);
+  cards.forEach((c) => (c.hidden = todays.length > 0 && c.dataset.arrival !== today));
+  if (title) title.textContent = (todays.length ? title.dataset.today : title.dataset.latest) ?? title.textContent;
+  if (sub) sub.hidden = todays.length > 0;
+
+  const date = document.querySelector<HTMLElement>('[data-today-date]');
+  if (date)
+    date.textContent = new Intl.DateTimeFormat('en-IN', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Kolkata' }).format(new Date());
+
+  // Printing works on the live site (not inside previews that block it).
+  const print = document.querySelector<HTMLButtonElement>('[data-print]');
+  if (print && !config.preview && typeof window.print === 'function') {
+    print.hidden = false;
+    print.addEventListener('click', () => window.print());
+  }
+</script>

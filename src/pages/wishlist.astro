@@ -1,0 +1,115 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { settings } from '../lib/catalog';
+import { waUrl } from '../lib/messages';
+---
+
+<Base title="Wishlist" description="Products you saved at DITTO HUB." noindex>
+  <section class="wrap page-head">
+    <h1 class="page-title">Wishlist</h1>
+    <p class="page-lead">Saved on this phone or computer only. Send the list to us to check availability.</p>
+  </section>
+  <section class="wrap wish" data-wishlist>
+    <p class="note" data-wish-loading>Loading your wishlist…</p>
+    <div class="empty" data-wish-empty hidden>
+      <h2>Nothing saved yet</h2>
+      <p>Tap the heart on any product to keep it here.</p>
+      <a class="btn btn-gold" href="/shop/">Browse the shop</a>
+    </div>
+    <div data-wish-full hidden>
+      <div class="wish-actions">
+        <a class="btn btn-wa" href={waUrl(settings.whatsapp, 'Hi DITTO HUB! These are on my wishlist.')} target="_blank" rel="noopener" data-wish-send>
+          <Icon name="chat" />Send my wishlist on WhatsApp
+        </a>
+      </div>
+      <div class="grid-products" data-wish-grid></div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .wish {
+    display: grid;
+    gap: 20px;
+    padding-bottom: clamp(56px, 8vw, 104px);
+  }
+
+  .wish-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+</style>
+
+<script>
+  import { priceView, stockState } from '../lib/pricing';
+  import { inr } from '../lib/format';
+  import { thumb } from '../lib/images';
+  import { waUrl, wishlistText } from '../lib/messages';
+  import { config, offerData } from '../scripts/config';
+  import { loadCatalog } from '../scripts/catalog';
+  import { asset, href } from '../scripts/paths';
+  import { store } from '../scripts/store';
+  import { refreshPrices } from '../scripts/live';
+
+  const HEART =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-8.6-9.1C2.3 7.6 4.3 4.5 7.6 4.5c1.9 0 3.3 1 4.4 2.6 1.1-1.6 2.5-2.6 4.4-2.6 3.3 0 5.3 3.1 4.2 6.4C19 15.6 12 20 12 20Z"/></svg>';
+
+  const loading = document.querySelector<HTMLElement>('[data-wish-loading]')!;
+  const empty = document.querySelector<HTMLElement>('[data-wish-empty]')!;
+  const full = document.querySelector<HTMLElement>('[data-wish-full]')!;
+  const grid = document.querySelector<HTMLElement>('[data-wish-grid]')!;
+  const send = document.querySelector<HTMLAnchorElement>('[data-wish-send]')!;
+
+  const products = await loadCatalog();
+  const byId = new Map(products.map((p) => [p.id, p]));
+
+  const render = () => {
+    const ids = store.wish().filter((id) => byId.has(id));
+    loading.hidden = true;
+    empty.hidden = ids.length > 0;
+    full.hidden = ids.length === 0;
+    grid.replaceChildren(
+      ...ids.map((id) => {
+        const p = byId.get(id)!;
+        const v = priceView(p, offerData.offers);
+        const stock = stockState(p.stock);
+        const card = document.createElement('article');
+        card.className = `card${stock.key === 'sold' ? ' is-sold' : ''}`;
+        Object.assign(card.dataset, { card: '', id: p.id, name: p.name, price: String(p.price), mrp: p.mrp ? String(p.mrp) : '', arrival: p.arrivalDate });
+        card.innerHTML = `
+          <div class="card-media"><img alt="" width="480" height="480" loading="lazy" decoding="async"></div>
+          <div class="card-heart"><button class="heart-btn" type="button" aria-pressed="true">${HEART}</button></div>
+          <div class="card-body">
+            <h3 class="card-name"><a></a></h3>
+            <div class="price-row"><span class="price js-price"></span><span class="mrp js-mrp"><span class="js-mrp-val"></span></span></div>
+            <p class="stock" data-state="${stock.key}" ${stock.key === 'in' ? 'hidden' : ''}></p>
+          </div>`;
+        card.querySelector('img')!.src = asset(thumb(p.image, 480));
+        const link = card.querySelector('a')!;
+        link.href = href(p.url);
+        link.textContent = p.name;
+        card.querySelector('.js-price')!.textContent = inr(v.price);
+        const mrp = card.querySelector<HTMLElement>('.js-mrp')!;
+        mrp.hidden = !v.mrp;
+        card.querySelector('.js-mrp-val')!.textContent = v.mrp ? inr(v.mrp) : '';
+        card.querySelector('.stock')!.textContent = stock.label;
+        const heart = card.querySelector<HTMLButtonElement>('.heart-btn')!;
+        heart.dataset.wish = p.id;
+        heart.setAttribute('aria-label', `Remove ${p.name} from wishlist`);
+        return card;
+      })
+    );
+    send.href = waUrl(
+      config.whatsapp,
+      wishlistText(ids.map((id) => ({ id, name: byId.get(id)!.name, price: priceView(byId.get(id)!, offerData.offers).price })))
+    );
+    refreshPrices(grid);
+    document.dispatchEvent(new Event('dh:cards'));
+  };
+
+  store.subscribe(render);
+  render();
+</script>

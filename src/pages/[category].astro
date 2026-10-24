@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import ShopBrowser from '../components/ShopBrowser.astro';
+import CatBanner from '../components/CatBanner.astro';
+import { CATEGORIES, featured, minPrice, products, type CategoryId } from '../lib/catalog';
+import { inr } from '../lib/format';
+
+export function getStaticPaths() {
+  return CATEGORIES.map((c) => ({ params: { category: c.id } }));
+}
+
+const id = Astro.params.category as CategoryId;
+const cat = CATEGORIES.find((c) => c.id === id)!;
+const list = products.filter((p) => p.category === id);
+const kind = id === 'sneakers' ? 'sneaker' : id === 'watches' ? 'watch' : 'gadget';
+const hero = featured(kind) ?? list[0];
+const from = minPrice(id);
+const word = cat.label.toUpperCase();
+---
+
+<Base title={cat.label} description={`${cat.label} at DITTO HUB: ${cat.blurb} ${from ? `From ${inr(from)}. ` : ''}All-India delivery, order on WhatsApp.`}>
+  <CatBanner word={word} cutouts={hero ? [hero.cutout ?? hero.images[0]] : []}>
+    <nav aria-label="Breadcrumb" class="crumbs">
+      <ol><li><a href="/">Home</a></li><li><a href="/shop/">Shop</a></li><li aria-current="page">{cat.label}</li></ol>
+    </nav>
+    <h1 class="page-title">{cat.label}</h1>
+    <p class="page-lead">{cat.blurb} {list.length} {list.length === 1 ? 'product' : 'products'}{from ? `, from ${inr(from)}` : ''}.</p>
+  </CatBanner>
+  <ShopBrowser products={list} lockCategory={id} />
+</Base>

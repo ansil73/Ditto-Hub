@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import ShopBrowser from '../components/ShopBrowser.astro';
+import { products } from '../lib/catalog';
+---
+
+<Base title="Shop all" description="Shop sneakers, watches and new gadgets at budget prices. Filter by budget, size and offers, then order on WhatsApp.">
+  <section class="wrap page-head">
+    <nav aria-label="Breadcrumb" class="crumbs">
+      <ol><li><a href="/">Home</a></li><li aria-current="page">Shop</li></ol>
+    </nav>
+    <h1 class="page-title">Shop</h1>
+    <p class="page-lead">Sneakers, watches and gadgets, updated every day. Pick a budget or search by name.</p>
+  </section>
+  <ShopBrowser products={products} />
+</Base>
