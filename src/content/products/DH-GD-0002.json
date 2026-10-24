@@ -1,0 +1,32 @@
+{
+  "id": "DH-GD-0002",
+  "name": "Hydro Blaster",
+  "category": "gadgets",
+  "type": "toys",
+  "price": 449,
+  "mrp": 899,
+  "stock": 5,
+  "sizes": [],
+  "colours": [
+    "Orange / Teal"
+  ],
+  "images": [
+    "/products/DH-GD-0002/1.webp",
+    "/products/DH-GD-0002/2.webp"
+  ],
+  "cutout": "/products/DH-GD-0002/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Big 500 ml tank",
+    "Pump-action range",
+    "Kid-friendly grip"
+  ],
+  "inBox": "Water blaster",
+  "description": "Pump-action water blaster with a big tank for long summer games.",
+  "tags": [],
+  "arrivalDate": "2026-10-21",
+  "status": "active",
+  "sample": true
+}

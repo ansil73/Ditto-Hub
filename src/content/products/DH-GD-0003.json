@@ -1,0 +1,32 @@
+{
+  "id": "DH-GD-0003",
+  "name": "FitBand Pulse",
+  "category": "gadgets",
+  "type": "smart",
+  "price": 799,
+  "mrp": 1999,
+  "stock": 0,
+  "sizes": [],
+  "colours": [
+    "Black"
+  ],
+  "images": [
+    "/products/DH-GD-0003/1.webp",
+    "/products/DH-GD-0003/2.webp"
+  ],
+  "cutout": "/products/DH-GD-0003/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Step and sleep tracking",
+    "Heart-rate display",
+    "7-day battery"
+  ],
+  "inBox": "Band, charging clip",
+  "description": "Slim fitness band that tracks steps, sleep and heart rate.",
+  "tags": [],
+  "arrivalDate": "2026-10-23",
+  "status": "active",
+  "sample": true
+}

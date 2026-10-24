@@ -1,0 +1,48 @@
+{
+  "offers": [
+    {
+      "productId": "DH-WT-0001",
+      "offerPrice": 499,
+      "label": "Flash deal",
+      "startsAt": "2026-10-24T09:00:00+05:30",
+      "endsAt": "2026-10-27T23:59:00+05:30"
+    },
+    {
+      "productId": "DH-SN-0003",
+      "offerPrice": 799,
+      "label": "Weekend price",
+      "startsAt": "2026-10-24T00:00:00+05:30",
+      "endsAt": "2026-10-26T23:59:00+05:30"
+    },
+    {
+      "productId": "DH-GD-0002",
+      "offerPrice": 349,
+      "label": "Flash deal",
+      "startsAt": "2026-10-24T00:00:00+05:30",
+      "endsAt": "2026-10-25T23:59:00+05:30"
+    },
+    {
+      "productId": "DH-GD-0004",
+      "offerPrice": 499,
+      "label": "Launch price",
+      "startsAt": "2026-10-24T00:00:00+05:30",
+      "endsAt": "2026-10-28T23:59:00+05:30"
+    }
+  ],
+  "combos": [
+    {
+      "id": "CB-001",
+      "title": "Runner + Chrono",
+      "productIds": ["DH-SN-0001", "DH-WT-0001"],
+      "comboPrice": 1899,
+      "endsAt": null
+    },
+    {
+      "id": "CB-002",
+      "title": "Weekend Fun Pack",
+      "productIds": ["DH-GD-0002", "DH-GD-0004"],
+      "comboPrice": 899,
+      "endsAt": "2026-10-31T23:59:00+05:30"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "DH-WT-0004",
+  "name": "Ocean Sport",
+  "category": "watches",
+  "type": "analog",
+  "price": 2499,
+  "mrp": 4999,
+  "stock": 2,
+  "sizes": [],
+  "colours": [
+    "Blue / Steel"
+  ],
+  "images": [
+    "/products/DH-WT-0004/1.webp",
+    "/products/DH-WT-0004/2.webp"
+  ],
+  "cutout": "/products/DH-WT-0004/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Rotating bezel",
+    "Luminous hands",
+    "Rubber sport strap"
+  ],
+  "inBox": "Watch and box",
+  "description": "Bold sport watch with a turning bezel and glow-in-the-dark hands.",
+  "tags": [
+    "premium"
+  ],
+  "arrivalDate": "2026-10-23",
+  "status": "active",
+  "sample": true
+}

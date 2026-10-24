@@ -1,0 +1,55 @@
+---
+import { settings, CATEGORIES, BUILD_NOW } from '../lib/catalog';
+import { waUrl, telUrl, prettyPhone } from '../lib/messages';
+import { istDate } from '../lib/pricing';
+import { shortDate } from '../lib/format';
+
+const b = settings.business;
+const year = istDate(BUILD_NOW).slice(0, 4);
+const pretty = (digits: string) => `${digits.slice(-10, -5)} ${digits.slice(-5)}`;
+---
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="/brand/ditto-hub-logo-tagline-dark.svg" alt="DITTO HUB — Luxury looks, budget prices" width="320" height="84" loading="lazy" />
+        <p class="note">Sneakers, watches and new gadgets at budget prices. {settings.deliveryText}.</p>
+      </div>
+      <nav class="footer-col" aria-labelledby="f-shop">
+        <h2 id="f-shop">Shop</h2>
+        <ul>
+          <li><a href="/shop/">All products</a></li>
+          {CATEGORIES.map((c) => <li><a href={`/${c.id}/`}>{c.label}</a></li>)}
+          <li><a href="/combos/">Combos</a></li>
+          <li><a href="/today/">Today's drop</a></li>
+        </ul>
+      </nav>
+      <nav class="footer-col" aria-labelledby="f-help">
+        <h2 id="f-help">Help</h2>
+        <ul>
+          <li><a href="/contact/#how-to-order">How to order</a></li>
+          <li><a href="/policies/delivery/">Delivery</a></li>
+          <li><a href="/policies/returns/">Returns and exchange</a></li>
+          <li><a href="/policies/privacy/">Privacy</a></li>
+          <li><a href="/policies/terms/">Terms</a></li>
+        </ul>
+      </nav>
+      <div class="footer-col">
+        <h2>Talk to us</h2>
+        <ul>
+          <li><a href={waUrl(settings.whatsapp, 'Hi DITTO HUB! I have a question.')} target="_blank" rel="noopener" data-track="whatsapp-footer">WhatsApp {pretty(settings.whatsapp)}</a></li>
+          <li><a href={telUrl(settings.phone)} data-track="call-footer">Call {prettyPhone(settings.phone)}</a></li>
+          <li><a href={`https://www.instagram.com/${settings.instagram}/`} target="_blank" rel="noopener" data-track="instagram-footer">Instagram @{settings.instagram}</a></li>
+          {settings.whatsappGroup && (
+            <li><a href={settings.whatsappGroup} target="_blank" rel="noopener" data-track="group-footer">Daily drops group</a></li>
+          )}
+        </ul>
+      </div>
+    </div>
+    <div class="footer-base">
+      <p>© {year} {b.legalName || settings.shopName}{b.address ? ` · ${b.address}` : ', Kerala, India'}</p>
+      <p>Prices updated {shortDate(istDate(BUILD_NOW))}</p>
+    </div>
+  </div>
+</footer>

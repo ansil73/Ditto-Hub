@@ -1,0 +1,53 @@
+{
+  "id": "DH-SN-0003",
+  "name": "Cloud Step",
+  "category": "sneakers",
+  "type": "casual",
+  "price": 999,
+  "mrp": 1999,
+  "stock": 10,
+  "sizes": [
+    {
+      "size": "UK 6",
+      "stock": 0
+    },
+    {
+      "size": "UK 7",
+      "stock": 2
+    },
+    {
+      "size": "UK 8",
+      "stock": 3
+    },
+    {
+      "size": "UK 9",
+      "stock": 3
+    },
+    {
+      "size": "UK 10",
+      "stock": 2
+    }
+  ],
+  "colours": [
+    "Grey / Sky"
+  ],
+  "images": [
+    "/products/DH-SN-0003/1.webp",
+    "/products/DH-SN-0003/2.webp"
+  ],
+  "cutout": "/products/DH-SN-0003/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Featherlight build",
+    "Slip-resistant sole",
+    "Easy lace-up"
+  ],
+  "inBox": "Pair of shoes and box",
+  "description": "A soft, featherlight walker for long days on your feet.",
+  "tags": [],
+  "arrivalDate": "2026-10-21",
+  "status": "active",
+  "sample": true
+}

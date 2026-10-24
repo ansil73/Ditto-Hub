@@ -1,0 +1,51 @@
+{
+  "id": "DH-SN-0004",
+  "name": "Trail Blaze",
+  "category": "sneakers",
+  "type": "running",
+  "price": 2199,
+  "mrp": 3999,
+  "stock": 6,
+  "sizes": [
+    {
+      "size": "UK 7",
+      "stock": 1
+    },
+    {
+      "size": "UK 8",
+      "stock": 2
+    },
+    {
+      "size": "UK 9",
+      "stock": 2
+    },
+    {
+      "size": "UK 10",
+      "stock": 1
+    }
+  ],
+  "colours": [
+    "Ember / Charcoal"
+  ],
+  "images": [
+    "/products/DH-SN-0004/1.webp",
+    "/products/DH-SN-0004/2.webp"
+  ],
+  "cutout": "/products/DH-SN-0004/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Deep-lug trail outsole",
+    "Toe guard",
+    "Water-resistant upper"
+  ],
+  "inBox": "Pair of shoes and box",
+  "description": "Rugged runner with a deep-lug sole for rough roads and rainy days.",
+  "tags": [
+    "new-season"
+  ],
+  "arrivalDate": "2026-10-24",
+  "status": "active",
+  "sample": true
+}

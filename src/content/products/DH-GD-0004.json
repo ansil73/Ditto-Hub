@@ -1,0 +1,32 @@
+{
+  "id": "DH-GD-0004",
+  "name": "Boom Cube",
+  "category": "gadgets",
+  "type": "audio",
+  "price": 599,
+  "mrp": 1299,
+  "stock": 9,
+  "sizes": [],
+  "colours": [
+    "Midnight Blue"
+  ],
+  "images": [
+    "/products/DH-GD-0004/1.webp",
+    "/products/DH-GD-0004/2.webp"
+  ],
+  "cutout": "/products/DH-GD-0004/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Wireless speaker",
+    "10-hour battery",
+    "Deep bass"
+  ],
+  "inBox": "Speaker, charging cable",
+  "description": "Palm-sized wireless speaker with surprisingly deep bass.",
+  "tags": [],
+  "arrivalDate": "2026-10-21",
+  "status": "active",
+  "sample": true
+}

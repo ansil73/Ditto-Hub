@@ -1,0 +1,251 @@
+---
+import Icon from './Icon.astro';
+import ProductCard from './ProductCard.astro';
+import { CATEGORIES, view, type CategoryId, type Product } from '../lib/catalog';
+import { TIERS } from '../lib/pricing';
+import { inr } from '../lib/format';
+
+interface Props {
+  products: Product[];
+  lockCategory?: CategoryId;
+}
+
+const { products, lockCategory } = Astro.props;
+const sizeOrder = (s: string) => parseFloat(s.replace(/[^\d.]/g, '')) || 0;
+const sizes = [...new Set(products.flatMap((p) => p.sizes.map((s) => s.size)))].sort((a, b) => sizeOrder(a) - sizeOrder(b));
+const maxPrice = Math.max(500, ...products.map((p) => Math.max(p.price, view(p).price)));
+const step = 50;
+const maxRounded = Math.ceil(maxPrice / step) * step;
+const showSizes = sizes.length > 0 && (!lockCategory || lockCategory === 'sneakers');
+---
+
+<div class="shop wrap" data-shop data-lock={lockCategory}>
+  <form class="shop-controls" data-shop-form role="search" aria-label="Filter products">
+    <div class="shop-bar">
+      <div class="search-box shop-search">
+        <Icon name="search" />
+        <label class="visually-hidden" for="shop-q">Search in the shop</label>
+        <input class="input" id="shop-q" name="q" type="search" placeholder="Search by name, type or ID" autocomplete="off" enterkeyhint="search" />
+      </div>
+      <button class="btn btn-quiet btn-sm shop-toggle" type="button" aria-expanded="false" aria-controls="shop-filters" data-filters-toggle>
+        <Icon name="filter" />Filters<span class="shop-toggle-count" data-filter-count hidden></span>
+      </button>
+      <div class="shop-sort">
+        <label class="visually-hidden" for="shop-sort">Sort products</label>
+        <select class="select" id="shop-sort" name="sort">
+          <option value="new">Newest first</option>
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+          <option value="discount">Biggest discount</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="shop-filters" id="shop-filters" data-filters>
+      {
+        !lockCategory && (
+          <fieldset class="filter-group">
+            <legend>Category</legend>
+            <div class="chip-row">
+              <label><input class="visually-hidden" type="radio" name="cat" value="all" checked /><span class="chip">All</span></label>
+              {CATEGORIES.map((c) => (
+                <label>
+                  <input class="visually-hidden" type="radio" name="cat" value={c.id} />
+                  <span class="chip">{c.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )
+      }
+      <fieldset class="filter-group">
+        <legend>Budget</legend>
+        <div class="chip-row">
+          <label><input class="visually-hidden" type="radio" name="tier" value="any" checked /><span class="chip">Any price</span></label>
+          {
+            TIERS.map((t) => (
+              <label>
+                <input class="visually-hidden" type="radio" name="tier" value={t.id} />
+                <span class="chip">{t.label}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+      {
+        showSizes && (
+          <fieldset class="filter-group" data-size-filter>
+            <legend>Sneaker size</legend>
+            <div class="chip-row">
+              {sizes.map((s) => (
+                <label>
+                  <input class="visually-hidden" type="checkbox" name="size" value={s} />
+                  <span class="chip">{s}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )
+      }
+      <fieldset class="filter-group">
+        <legend>Show</legend>
+        <div class="chip-row">
+          <label><input class="visually-hidden" type="checkbox" name="instock" value="1" checked /><span class="chip">In stock only</span></label>
+          <label><input class="visually-hidden" type="checkbox" name="new" value="1" /><span class="chip">New this week</span></label>
+          <label><input class="visually-hidden" type="checkbox" name="offer" value="1" /><span class="chip">On offer</span></label>
+        </div>
+      </fieldset>
+      <div class="filter-group filter-range">
+        <label for="shop-max">Up to <output data-max-out for="shop-max">{inr(maxRounded)}</output></label>
+        <input id="shop-max" name="max" type="range" min="0" max={maxRounded} step={step} value={maxRounded} data-max={maxRounded} />
+      </div>
+      <button class="btn btn-ghost btn-sm shop-clear" type="button" data-clear>Clear filters</button>
+    </div>
+  </form>
+
+  <p class="shop-count" data-shop-count aria-live="polite">{products.length} {products.length === 1 ? 'product' : 'products'}</p>
+
+  <div class="grid-products" data-shop-grid>
+    {products.map((p, i) => <ProductCard product={p} loading={i < 4 ? 'eager' : 'lazy'} />)}
+  </div>
+
+  <div class="empty" data-shop-empty hidden>
+    <h2>No products match these filters</h2>
+    <p>Try a higher budget, another size, or clear the filters to see everything.</p>
+    <button class="btn btn-ghost btn-sm" type="button" data-clear>Clear filters</button>
+  </div>
+</div>
+
+<style is:global>
+  .shop {
+    display: grid;
+    gap: 18px;
+    padding-bottom: clamp(56px, 8vw, 104px);
+  }
+
+  .shop-controls {
+    display: grid;
+    gap: 14px;
+  }
+
+  .shop-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .shop-search {
+    grid-column: 1 / -1;
+  }
+
+  .shop-search .input {
+    min-height: 52px;
+  }
+
+  .shop-sort .select {
+    min-height: 44px;
+    border-radius: 999px;
+  }
+
+  @media (min-width: 720px) {
+    .shop-bar {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+
+    .shop-search {
+      grid-column: auto;
+    }
+  }
+
+  .shop-toggle-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--gold);
+    color: var(--ink);
+    font-size: 0.75rem;
+  }
+
+  .shop-filters {
+    display: grid;
+    gap: 18px;
+    padding: 20px;
+    border-radius: var(--r-l);
+    border: 1px solid var(--steel);
+    background: var(--graphite);
+  }
+
+  .shop-filters:not(.is-open) {
+    display: none;
+  }
+
+  @media (min-width: 1080px) {
+    .shop-toggle {
+      display: none;
+    }
+
+    .shop-filters,
+    .shop-filters:not(.is-open) {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+      gap: 18px 32px;
+    }
+  }
+
+  .filter-group {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .filter-group legend,
+  .filter-range label {
+    padding: 0;
+    margin-bottom: 10px;
+    font-weight: 800;
+    font-size: 0.9rem;
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip-row label {
+    display: inline-flex;
+    cursor: pointer;
+  }
+
+  .filter-range input[type='range'] {
+    width: 100%;
+    accent-color: var(--gold);
+    min-height: 32px;
+  }
+
+  .filter-range output {
+    color: var(--gold);
+  }
+
+  .shop-clear {
+    justify-self: start;
+  }
+
+  .shop-count {
+    color: var(--mist);
+    font-weight: 700;
+  }
+</style>
+
+<script>
+  import { initShop } from '../scripts/shop';
+  initShop();
+</script>

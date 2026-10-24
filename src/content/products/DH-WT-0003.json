@@ -1,0 +1,32 @@
+{
+  "id": "DH-WT-0003",
+  "name": "Pulse Digital",
+  "category": "watches",
+  "type": "digital",
+  "price": 199,
+  "mrp": 499,
+  "stock": 12,
+  "sizes": [],
+  "colours": [
+    "Black / Volt"
+  ],
+  "images": [
+    "/products/DH-WT-0003/1.webp",
+    "/products/DH-WT-0003/2.webp"
+  ],
+  "cutout": "/products/DH-WT-0003/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Backlight",
+    "Alarm and stopwatch",
+    "Lightweight resin strap"
+  ],
+  "inBox": "Watch",
+  "description": "Tough little digital watch with alarm, stopwatch and backlight.",
+  "tags": [],
+  "arrivalDate": "2026-10-21",
+  "status": "active",
+  "sample": true
+}

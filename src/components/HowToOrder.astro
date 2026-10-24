@@ -1,0 +1,83 @@
+---
+import { settings } from '../lib/catalog';
+interface Props {
+  id?: string;
+}
+const { id = 'how-to-order' } = Astro.props;
+---
+
+<section class="band band-raised how" aria-labelledby={`${id}-title`} id={id}>
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title" id={`${id}-title`}>How to order</h2>
+        <p class="section-sub">No account, no checkout. You order in a chat, and we confirm everything with you.</p>
+      </div>
+    </div>
+    <ol class="how-steps">
+      <li>
+        <span class="how-num" aria-hidden="true">1</span>
+        <h3>Pick your product</h3>
+        <p>Choose your size and colour on the product page, or add a few things to your bag.</p>
+      </li>
+      <li>
+        <span class="how-num" aria-hidden="true">2</span>
+        <h3>Tap "Order on WhatsApp"</h3>
+        <p>The product, size, colour and today's price are filled in for you. Add your name and pincode, then send.</p>
+      </li>
+      <li>
+        <span class="how-num" aria-hidden="true">3</span>
+        <h3>Confirm and receive</h3>
+        <p>We confirm stock and payment in the chat and ship it to you. {settings.deliveryText}.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<style>
+  .how-steps {
+    display: grid;
+    gap: 14px;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 820px) {
+    .how-steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+  }
+
+  .how-steps li {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 24px;
+    border-radius: var(--r-l);
+    background: var(--ink);
+    border: 1px solid var(--steel);
+  }
+
+  .how-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2.6rem;
+    line-height: 1;
+    background: var(--gold-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .how-steps h3 {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--step-1);
+    letter-spacing: 0;
+  }
+
+  .how-steps p {
+    color: var(--mist);
+  }
+</style>

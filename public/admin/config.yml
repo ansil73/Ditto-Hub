@@ -1,0 +1,358 @@
+# DITTO HUB admin (Sveltia CMS). Open https://<your-site>/admin/ on your phone.
+# Every save is a commit to GitHub; the deploy workflow puts it live in a few minutes.
+#
+# Before the first sign-in, change the two lines marked CHANGE ME below (see README → Admin).
+
+backend:
+  name: github
+  repo: YOUR-GITHUB-USERNAME/ditto-hub # CHANGE ME: your GitHub username / repository name
+  branch: main
+  # Sign-in button "Sign in with GitHub" needs the free Sveltia auth worker (README → Admin, step 3).
+  # Until then you can use "Sign in with token" with a GitHub access token.
+  base_url: https://sveltia-cms-auth.YOUR-SUBDOMAIN.workers.dev # CHANGE ME after deploying the worker
+  commit_messages:
+    create: 'Add {{collection}} “{{slug}}”'
+    update: 'Update {{collection}} “{{slug}}”'
+    delete: 'Remove {{collection}} “{{slug}}”'
+    uploadMedia: 'Upload “{{path}}”'
+    deleteMedia: 'Delete “{{path}}”'
+
+app_title: DITTO HUB admin
+logo:
+  src: /icons/icon-192.png
+
+# Photos are converted to WebP in your browser before they are saved: at most 1600 px, quality 80.
+media_folder: public/uploads
+public_folder: /uploads
+media_libraries:
+  default:
+    config:
+      max_file_size: 25000000
+      slugify_filename: true
+      transformations:
+        raster_image:
+          format: webp
+          quality: 80
+          width: 1600
+          height: 1600
+
+# Keep product IDs exactly as typed (DH-SN-0001), so file and folder names match the ID.
+slug:
+  encoding: ascii
+  clean_accents: true
+  lowercase: false
+
+output:
+  json:
+    indent_style: space
+    indent_size: 2
+
+collections:
+  # ------------------------------------------------------------------ products
+  - name: products
+    label: Products
+    label_singular: Product
+    description: One entry per product. Set Status to Hidden to take a product off the site without deleting it.
+    folder: src/content/products
+    format: json
+    extension: json
+    identifier_field: name
+    slug: '{{id}}'
+    summary: '{{name}} · {{id}} · ₹{{price}} · {{status}}'
+    thumbnail: images.*
+    sortable_fields:
+      fields: [arrivalDate, name, price, id]
+      default:
+        field: arrivalDate
+        direction: descending
+    view_filters:
+      - label: Sneakers
+        field: category
+        pattern: sneakers
+      - label: Watches
+        field: category
+        pattern: watches
+      - label: Gadgets
+        field: category
+        pattern: gadgets
+      - label: Hidden or archived
+        field: status
+        pattern: hidden|archived
+      - label: Sample products (replace these)
+        field: sample
+        pattern: true
+    view_groups:
+      - label: Category
+        field: category
+      - label: Arrival date
+        field: arrivalDate
+    # Photos for a product go into its own folder: /public/products/<ID>/
+    media_folder: /public/products/{{filename}}
+    public_folder: /products/{{filename}}
+    fields:
+      - name: id
+        label: Product ID
+        widget: string
+        hint: 'DH-SN-0001 for sneakers, DH-WT-0001 for watches, DH-GD-0001 for gadgets. Use the next free number and never reuse an ID.'
+        pattern: ['^DH-(SN|WT|GD)-[0-9]{4}$', 'Use the format DH-SN-0001, DH-WT-0001 or DH-GD-0001']
+      - name: name
+        label: Product name
+        widget: string
+        hint: 'Your own product name, like "Aero Runner". Do not use other companies’ brand or model names.'
+      - name: category
+        label: Category
+        widget: select
+        options:
+          - { label: Sneakers, value: sneakers }
+          - { label: Watches, value: watches }
+          - { label: Gadgets, value: gadgets }
+      - name: type
+        label: Type
+        widget: string
+        required: false
+        hint: 'One word: running, casual, court, analog, digital, sport, smart, home, outdoor, toys…'
+      - name: price
+        label: Price (₹)
+        widget: number
+        value_type: int
+        min: 1
+        hint: The price you sell at today. During an offer, the offer price from “Today’s offers” is shown instead.
+      - name: mrp
+        label: MRP (₹) — the crossed-out price
+        widget: number
+        value_type: int
+        min: 1
+        required: false
+        hint: Leave empty if there is no MRP. The discount % is worked out from MRP and price.
+      - name: stock
+        label: Stock (pieces)
+        widget: number
+        value_type: int
+        min: 0
+        default: 1
+        hint: For watches and gadgets. Sneakers use the stock under each size instead. 0 shows “Sold out”.
+      - name: sizes
+        label: Sneaker sizes
+        label_singular: size
+        widget: list
+        required: false
+        collapsed: false
+        summary: '{{fields.size}} — {{fields.stock}} in stock'
+        hint: Sneakers only. Set stock to 0 for a size that has sold out; it shows greyed out.
+        fields:
+          - { name: size, label: Size, widget: string, hint: 'UK 8' }
+          - { name: stock, label: Stock, widget: number, value_type: int, min: 0, default: 1 }
+      - name: colours
+        label: Colours
+        label_singular: colour
+        widget: list
+        required: false
+        field: { name: colour, label: Colour, widget: string, hint: 'White / Volt' }
+      - name: images
+        label: Photos
+        widget: image
+        multiple: true
+        min: 1
+        max: 8
+        hint: First photo is the main one. Upload JPG or PNG from your phone; it is converted to WebP automatically.
+      - name: cutout
+        label: Cut-out photo (optional)
+        widget: image
+        required: false
+        hint: The product on a transparent background (PNG). Used on the 3D podium and the floating cards.
+        media_libraries:
+          default:
+            config:
+              transformations:
+                raster_image:
+                  format: webp
+                  quality: 85
+                  width: 1200
+                  height: 1200
+      - name: model
+        label: 3D model (optional, .glb)
+        widget: file
+        required: false
+        accept: '.glb,model/gltf-binary'
+        hint: 'At most 3 MB. Run “npm run optimize:models” on a computer first (README → 3D models).'
+      - name: spinFrames
+        label: 360° photos (number of frames)
+        widget: number
+        value_type: int
+        min: 0
+        default: 0
+        hint: 'Leave 0. If you upload 24–36 turntable photos to /public/products/<ID>/spin/ as 01.webp, 02.webp…, enter how many.'
+      - name: video
+        label: Turntable video (optional)
+        widget: file
+        required: false
+        accept: 'video/mp4,video/webm'
+        hint: '6–10 seconds, muted, at most 2 MB (MP4).'
+      - name: highlights
+        label: Highlights
+        label_singular: highlight
+        widget: list
+        required: false
+        field: { name: highlight, label: Highlight, widget: string }
+        hint: Short points, like “Water resistant”.
+      - name: inBox
+        label: What’s in the box
+        widget: string
+        required: false
+      - name: description
+        label: Description
+        widget: text
+        required: false
+      - name: tags
+        label: Tags
+        label_singular: tag
+        widget: list
+        required: false
+        field: { name: tag, label: Tag, widget: string }
+        hint: Extra search words, like bestseller or gift.
+      - name: arrivalDate
+        label: Arrival date
+        widget: datetime
+        type: date
+        format: YYYY-MM-DD
+        default: '{{now}}'
+        input_timezone: Asia/Kolkata
+        hint: Today’s date marks it TODAY on the site; the last 3 days show NEW.
+      - name: status
+        label: Status
+        widget: select
+        default: active
+        options:
+          - { label: Active (shown on the site), value: active }
+          - { label: Hidden (not shown anywhere), value: hidden }
+          - { label: Archived (link says “No longer available”), value: archived }
+      - name: sample
+        label: Sample product
+        widget: boolean
+        default: false
+        required: false
+        hint: Sample products are placeholders shipped with the site. Replace or delete them.
+
+  # ------------------------------------------------------------------ offers, combos, settings, customer love
+  - name: daily
+    label: Daily updates
+    description: Today’s offers, combo deals, shop settings and customer photos.
+    format: json
+    files:
+      - name: offers
+        label: Today’s offers and combos
+        file: src/content/offers.json
+        fields:
+          - name: offers
+            label: Offers
+            label_singular: offer
+            widget: list
+            required: false
+            summary: '{{fields.productId}} → ₹{{fields.offerPrice}} ({{fields.label}})'
+            hint: An offer shows only between its start and end time (India time), then disappears by itself.
+            fields:
+              - name: productId
+                label: Product
+                widget: relation
+                collection: products
+                value_field: id
+                search_fields: [name, id]
+                display_fields: ['{{name}} · {{id}} · ₹{{price}}']
+              - { name: offerPrice, label: Offer price (₹), widget: number, value_type: int, min: 1 }
+              - { name: label, label: Label, widget: string, required: false, hint: 'Short, like “Flash deal” or “Weekend price”.' }
+              - name: startsAt
+                label: Starts
+                widget: datetime
+                required: false
+                input_timezone: Asia/Kolkata
+                hint: Leave empty to start right away.
+              - name: endsAt
+                label: Ends
+                widget: datetime
+                required: false
+                input_timezone: Asia/Kolkata
+                hint: A countdown runs to this time. Leave empty for no end.
+          - name: combos
+            label: Combo deals
+            label_singular: combo
+            widget: list
+            required: false
+            summary: '{{fields.title}} — ₹{{fields.comboPrice}}'
+            fields:
+              - { name: id, label: Combo ID, widget: string, pattern: ['^CB-[0-9]{3}$', 'Use CB-001, CB-002…'] }
+              - { name: title, label: Title, widget: string, hint: 'Like “Runner + Chrono”.' }
+              - name: productIds
+                label: Products in the combo
+                widget: relation
+                collection: products
+                value_field: id
+                search_fields: [name, id]
+                display_fields: ['{{name}} · {{id}} · ₹{{price}}']
+                multiple: true
+                min: 2
+              - { name: comboPrice, label: Combo price (₹), widget: number, value_type: int, min: 1 }
+              - name: endsAt
+                label: Ends
+                widget: datetime
+                required: false
+                input_timezone: Asia/Kolkata
+                hint: Leave empty for no end.
+
+      - name: settings
+        label: Shop settings
+        file: src/content/settings.json
+        fields:
+          - { name: shopName, label: Shop name, widget: string }
+          - { name: tagline, label: Tagline, widget: string }
+          - name: whatsapp
+            label: WhatsApp Business number
+            widget: string
+            pattern: ['^[0-9]{10,15}$', 'Country code and number, digits only, like 919995706323']
+            hint: Every “Order on WhatsApp” button sends to this number.
+          - { name: phone, label: Phone for calls, widget: string, hint: 'With +91, like +918078102296' }
+          - { name: instagram, label: Instagram username, widget: string, hint: 'Without @, like _ditto.hub._' }
+          - { name: whatsappGroup, label: WhatsApp group invite link, widget: string, required: false }
+          - { name: announcement, label: Announcement bar, widget: string, required: false, hint: 'Like “Today’s drop is live”. The number of new arrivals is added automatically.' }
+          - { name: deliveryText, label: Delivery line, widget: string }
+          - { name: cod, label: Cash on delivery available, widget: boolean, default: false }
+          - name: featured
+            label: Featured in the 3D Drop Room
+            widget: object
+            fields:
+              - { name: sneaker, label: Sneaker, widget: relation, collection: products, value_field: id, search_fields: [name, id], display_fields: ['{{name}} · {{id}}'], filters: [{ field: category, values: [sneakers] }] }
+              - { name: watch, label: Watch, widget: relation, collection: products, value_field: id, search_fields: [name, id], display_fields: ['{{name}} · {{id}}'], filters: [{ field: category, values: [watches] }] }
+              - { name: gadget, label: Gadget, widget: relation, collection: products, value_field: id, search_fields: [name, id], display_fields: ['{{name}} · {{id}}'], filters: [{ field: category, values: [gadgets] }] }
+          - name: instaImages
+            label: Instagram strip (6 photos)
+            widget: image
+            multiple: true
+            max: 6
+            required: false
+            media_folder: /public/insta
+            public_folder: /insta
+          - name: business
+            label: Business details (shown on Contact and policy pages)
+            widget: object
+            fields:
+              - { name: legalName, label: Business name, widget: string, required: false }
+              - { name: address, label: Address, widget: text, required: false }
+              - { name: email, label: Email, widget: string, required: false }
+              - { name: grievanceContact, label: Grievance contact, widget: string, required: false, hint: 'Name and phone or email of the person who handles complaints.' }
+          - { name: analytics, label: Count button taps (GoatCounter), widget: boolean, default: false }
+          - { name: goatcounterCode, label: GoatCounter code, widget: string, required: false, hint: 'The part before .goatcounter.com, like dittohub.' }
+
+      - name: reviews
+        label: Customer love
+        file: src/content/reviews.json
+        fields:
+          - name: items
+            label: Customer photos
+            label_singular: photo
+            widget: list
+            required: false
+            hint: Real customer photos or chat screenshots only, shared with their permission. The section stays hidden while this is empty.
+            summary: '{{fields.caption}}'
+            fields:
+              - { name: image, label: Photo, widget: image, media_folder: /public/reviews, public_folder: /reviews }
+              - { name: caption, label: Caption, widget: string, required: false }
+              - { name: date, label: Date, widget: datetime, type: date, format: YYYY-MM-DD, required: false, input_timezone: Asia/Kolkata }

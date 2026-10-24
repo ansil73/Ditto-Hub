@@ -1,0 +1,55 @@
+{
+  "id": "DH-SN-0001",
+  "name": "Aero Runner",
+  "category": "sneakers",
+  "type": "running",
+  "price": 1499,
+  "mrp": 2999,
+  "stock": 11,
+  "sizes": [
+    {
+      "size": "UK 6",
+      "stock": 2
+    },
+    {
+      "size": "UK 7",
+      "stock": 3
+    },
+    {
+      "size": "UK 8",
+      "stock": 4
+    },
+    {
+      "size": "UK 9",
+      "stock": 2
+    },
+    {
+      "size": "UK 10",
+      "stock": 0
+    }
+  ],
+  "colours": [
+    "White / Volt"
+  ],
+  "images": [
+    "/products/DH-SN-0001/1.webp",
+    "/products/DH-SN-0001/2.webp"
+  ],
+  "cutout": "/products/DH-SN-0001/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Cushioned foam midsole",
+    "Breathable knit upper",
+    "Grippy rubber outsole"
+  ],
+  "inBox": "Pair of shoes and box",
+  "description": "Light daily runner with a soft, springy midsole and a breathable upper.",
+  "tags": [
+    "bestseller"
+  ],
+  "arrivalDate": "2026-10-24",
+  "status": "active",
+  "sample": true
+}

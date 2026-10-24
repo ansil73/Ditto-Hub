@@ -1,0 +1,32 @@
+{
+  "id": "DH-WT-0002",
+  "name": "Steel Classic",
+  "category": "watches",
+  "type": "analog",
+  "price": 1199,
+  "mrp": 2499,
+  "stock": 3,
+  "sizes": [],
+  "colours": [
+    "Silver"
+  ],
+  "images": [
+    "/products/DH-WT-0002/1.webp",
+    "/products/DH-WT-0002/2.webp"
+  ],
+  "cutout": "/products/DH-WT-0002/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Stainless steel bracelet",
+    "Date window",
+    "Splash resistant"
+  ],
+  "inBox": "Watch and box",
+  "description": "A timeless silver watch with a link bracelet and date window.",
+  "tags": [],
+  "arrivalDate": "2026-10-23",
+  "status": "active",
+  "sample": true
+}

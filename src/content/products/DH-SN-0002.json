@@ -1,0 +1,53 @@
+{
+  "id": "DH-SN-0002",
+  "name": "Street Court",
+  "category": "sneakers",
+  "type": "casual",
+  "price": 1299,
+  "mrp": 2499,
+  "stock": 7,
+  "sizes": [
+    {
+      "size": "UK 6",
+      "stock": 1
+    },
+    {
+      "size": "UK 7",
+      "stock": 2
+    },
+    {
+      "size": "UK 8",
+      "stock": 2
+    },
+    {
+      "size": "UK 9",
+      "stock": 1
+    },
+    {
+      "size": "UK 10",
+      "stock": 1
+    }
+  ],
+  "colours": [
+    "Black / Gold"
+  ],
+  "images": [
+    "/products/DH-SN-0002/1.webp",
+    "/products/DH-SN-0002/2.webp"
+  ],
+  "cutout": "/products/DH-SN-0002/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Padded collar",
+    "Stitched leather-look upper",
+    "Flat court sole"
+  ],
+  "inBox": "Pair of shoes and box",
+  "description": "Clean low-top for everyday wear, dressed up with gold details.",
+  "tags": [],
+  "arrivalDate": "2026-10-23",
+  "status": "active",
+  "sample": true
+}

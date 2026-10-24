@@ -1,0 +1,70 @@
+---
+import Icon from './Icon.astro';
+import { BUILD_NOW, view, type Product } from '../lib/catalog';
+import { inr } from '../lib/format';
+import { arrivalBadge } from '../lib/pricing';
+import { thumb, srcset } from '../lib/images';
+import { typeLabel } from '../lib/labels';
+
+interface Props {
+  product: Product;
+  loading?: 'lazy' | 'eager';
+  sizes?: string;
+}
+
+const { product: p, loading = 'lazy', sizes = '(min-width: 1080px) 290px, (min-width: 720px) 31vw, 46vw' } = Astro.props;
+const v = view(p);
+const badge = arrivalBadge(p.arrivalDate, BUILD_NOW);
+const sold = v.stock.key === 'sold';
+const inStockSizes = p.sizes.filter((s) => s.stock > 0).map((s) => s.size);
+---
+
+<article
+  class:list={['card', sold && 'is-sold']}
+  data-card
+  data-id={p.id}
+  data-name={p.name}
+  data-category={p.category}
+  data-type={p.type}
+  data-price={p.price}
+  data-mrp={p.mrp ?? ''}
+  data-stock={p.stockTotal}
+  data-arrival={p.arrivalDate}
+  data-sizes={inStockSizes.join('|')}
+  data-tags={p.tags.join('|')}
+>
+  <div class="card-media">
+    <img
+      src={thumb(p.images[0], 480)}
+      srcset={srcset(p.images[0])}
+      sizes={sizes}
+      alt={`${p.name}${p.colours[0] ? `, ${p.colours[0]}` : ''}`}
+      width="480"
+      height="480"
+      loading={loading}
+      decoding="async"
+    />
+    <div class="card-badges">
+      <span class="badge badge-today js-arrival" data-kind="today" hidden={badge !== 'today'}>TODAY</span>
+      <span class="badge badge-new js-arrival" data-kind="new" hidden={badge !== 'new'}>NEW</span>
+      <span class="badge badge-sale js-off" hidden={!v.discount}>−{v.discount}%</span>
+      {sold && <span class="badge badge-sold">Sold out</span>}
+      {p.sample && <span class="badge badge-sample">Sample</span>}
+    </div>
+  </div>
+  <div class="card-heart">
+    <button class="heart-btn" type="button" data-wish={p.id} aria-pressed="false" aria-label={`Save ${p.name} to wishlist`}>
+      <Icon name="heart" />
+    </button>
+  </div>
+  <div class="card-body">
+    <p class="card-meta">{typeLabel(p.category, p.type)}</p>
+    <h3 class="card-name"><a href={p.url}>{p.name}</a></h3>
+    <div class="price-row" data-live-price={p.id}>
+      <span class="visually-hidden">Price</span>
+      <span class="price js-price">{inr(v.price)}</span>
+      <span class="mrp js-mrp" hidden={!v.mrp}><span class="visually-hidden">MRP </span><span class="js-mrp-val">{v.mrp ? inr(v.mrp) : ''}</span></span>
+    </div>
+    <p class="stock js-stock" data-state={v.stock.key} hidden={v.stock.key === 'in'}>{v.stock.label}</p>
+  </div>
+</article>

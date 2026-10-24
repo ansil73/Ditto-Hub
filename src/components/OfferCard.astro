@@ -1,0 +1,68 @@
+---
+import Icon from './Icon.astro';
+import { getProduct, settings, type Product } from '../lib/catalog';
+import { inr } from '../lib/format';
+import { countdown, discountPct, stockState, type Offer } from '../lib/pricing';
+import { thumb, srcset } from '../lib/images';
+import { productOrderText, waUrl } from '../lib/messages';
+
+interface Props {
+  offer: Offer;
+}
+
+const { offer } = Astro.props;
+const p = getProduct(offer.productId) as Product;
+const price = Math.min(offer.offerPrice, p.price);
+const mrp = p.mrp && p.mrp > price ? p.mrp : null;
+const off = discountPct(mrp, price);
+const stock = stockState(p.stockTotal);
+// The bar is full at 10 or more pieces; the words under it say the real count when it is low.
+const stockFill = p.stockTotal <= 0 ? 0 : Math.max(8, Math.min(100, p.stockTotal * 10));
+const fallbackWa = waUrl(settings.whatsapp, productOrderText({ id: p.id, name: p.name, price }));
+---
+
+<article
+  class="offer-card card"
+  data-offer-card
+  data-price-block
+  data-product-ctx
+  data-id={p.id}
+  data-name={p.name}
+  data-url={p.url}
+  data-price={p.price}
+  data-mrp={p.mrp ?? ''}
+  data-arrival={p.arrivalDate}
+  data-starts={offer.startsAt ?? undefined}
+  data-ends={offer.endsAt ?? undefined}
+>
+  <a class="offer-media card-media" href={p.url} tabindex="-1" aria-hidden="true">
+    <img src={thumb(p.images[0], 480)} srcset={srcset(p.images[0])} sizes="(min-width: 1080px) 290px, (min-width: 720px) 42vw, 78vw" alt="" width="480" height="480" loading="lazy" decoding="async" />
+    <div class="card-badges">
+      <span class="badge badge-sale js-off" hidden={!off}>−{off}%</span>
+      {p.sample && <span class="badge badge-sample">Sample</span>}
+    </div>
+  </a>
+  <div class="offer-body">
+    <p class="offer-label"><Icon name="clock" />{offer.label || 'Offer'}</p>
+    <h3 class="offer-name"><a href={p.url}>{p.name}</a></h3>
+    <div class="price-row">
+      <span class="visually-hidden">Offer price</span>
+      <span class="price offer-price js-price">{inr(price)}</span>
+      <span class="mrp js-mrp" hidden={!mrp}><span class="visually-hidden">MRP </span><span class="js-mrp-val">{mrp ? inr(mrp) : ''}</span></span>
+    </div>
+    {
+      offer.endsAt && (
+        <p class="offer-ends">
+          Ends in <span class="countdown" data-countdown data-ends={offer.endsAt}>{countdown(offer.endsAt)}</span>
+        </p>
+      )
+    }
+    <div class="stock-bar">
+      <span aria-hidden="true" style={`--fill: ${stockFill}%`} />
+      <p class="stock" data-state={stock.key}>{stock.label}</p>
+    </div>
+    <a class="btn btn-wa btn-sm" href={fallbackWa} target="_blank" rel="noopener" data-wa="product" data-id={p.id}>
+      <Icon name="chat" />Order on WhatsApp
+    </a>
+  </div>
+</article>

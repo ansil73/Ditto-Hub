@@ -1,0 +1,69 @@
+---
+import Icon from './Icon.astro';
+import { settings, type liveCombos } from '../lib/catalog';
+import { inr } from '../lib/format';
+import { countdown } from '../lib/pricing';
+import { thumb } from '../lib/images';
+import { comboText, waUrl } from '../lib/messages';
+
+type LiveCombo = ReturnType<typeof liveCombos>[number];
+interface Props {
+  combo: LiveCombo;
+}
+
+const { combo } = Astro.props;
+const names = combo.items.map((p) => p.name);
+const fallbackWa = waUrl(settings.whatsapp, comboText({ id: combo.id, title: combo.title, price: combo.comboPrice, includes: names }));
+---
+
+<article class="combo-card card" data-combo-card data-ends={combo.endsAt ?? undefined}>
+  <div class="combo-media" aria-hidden="true">
+    {
+      combo.items.slice(0, 3).map((p, i) => (
+        <div class="combo-thumb card-media" style={`--i: ${i}`}>
+          <img src={thumb(p.images[0], 480)} alt="" width="480" height="480" loading="lazy" decoding="async" />
+        </div>
+      ))
+    }
+  </div>
+  <div class="combo-body">
+    <p class="offer-label"><Icon name="gift" />Combo deal</p>
+    <h3 class="combo-title">{combo.title}</h3>
+    <p class="combo-items">
+      {
+        combo.items.map((p, i) => (
+          <>
+            <a href={p.url}>{p.name}</a>
+            {i < combo.items.length - 1 ? ' + ' : ''}
+          </>
+        ))
+      }
+    </p>
+    <div class="price-row">
+      <span class="visually-hidden">Combo price</span>
+      <span class="price combo-price">{inr(combo.comboPrice)}</span>
+      {combo.regular > combo.comboPrice && <span class="mrp"><span class="visually-hidden">Bought separately </span>{inr(combo.regular)}</span>}
+    </div>
+    {combo.saving > 0 && <p class="combo-save">You save {inr(combo.saving)}</p>}
+    {
+      combo.endsAt && (
+        <p class="offer-ends">
+          Ends in <span class="countdown" data-countdown data-ends={combo.endsAt}>{countdown(combo.endsAt)}</span>
+        </p>
+      )
+    }
+    <a
+      class="btn btn-wa btn-sm"
+      href={fallbackWa}
+      target="_blank"
+      rel="noopener"
+      data-wa="combo"
+      data-combo-id={combo.id}
+      data-combo-title={combo.title}
+      data-combo-price={combo.comboPrice}
+      data-combo-items={names.join('|')}
+    >
+      <Icon name="chat" />Order this combo
+    </a>
+  </div>
+</article>

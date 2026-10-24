@@ -1,0 +1,20 @@
+---
+import Icon from './Icon.astro';
+import { settings } from '../lib/catalog';
+import { waUrl, telUrl, prettyPhone } from '../lib/messages';
+---
+
+<div class="float-contact no-print">
+  <div class="float-more" id="float-more" hidden>
+    <a class="float-pill" href={telUrl(settings.phone)} data-track="call-float"><Icon name="phone" />Call {prettyPhone(settings.phone)}</a>
+    <a class="float-pill" href={`https://ig.me/m/${settings.instagram}`} target="_blank" rel="noopener" data-track="instagram-float"><Icon name="camera" />Instagram DM</a>
+  </div>
+  <div class="float-main">
+    <button class="float-toggle" type="button" aria-expanded="false" aria-controls="float-more" aria-label="More ways to contact us" data-float-toggle>
+      <Icon name="chevron" />
+    </button>
+    <a class="float-wa" href={waUrl(settings.whatsapp, 'Hi DITTO HUB! I have a question.')} target="_blank" rel="noopener" aria-label="Chat with DITTO HUB on WhatsApp" data-track="whatsapp-float">
+      <Icon name="chat" />
+    </a>
+  </div>
+</div>

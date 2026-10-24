@@ -1,0 +1,95 @@
+---
+import Icon from './Icon.astro';
+import Mark from './Mark.astro';
+import Wordmark from './Wordmark.astro';
+import { settings, products, CATEGORIES } from '../lib/catalog';
+import { waUrl, telUrl, prettyPhone } from '../lib/messages';
+
+const path = Astro.url.pathname;
+const current = (href: string) => (path === href || (href !== '/' && path.startsWith(href)) ? 'page' : undefined);
+const counts = Object.fromEntries(CATEGORIES.map((c) => [c.id, products.filter((p) => p.category === c.id).length]));
+const generalWa = waUrl(settings.whatsapp, 'Hi DITTO HUB! I have a question.');
+---
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="announce no-print">
+  <div class="wrap announce-inner">
+    <p><span class="announce-dot" aria-hidden="true"></span><span data-announce data-base={settings.announcement}>{settings.announcement}</span></p>
+    <a href="/today/">See today's drop</a>
+  </div>
+</div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/" aria-label="DITTO HUB home">
+      <Mark variant="live" class="brand-mark" />
+      <Wordmark class="brand-word" />
+    </a>
+    <nav class="main-nav" aria-label="Main">
+      <a href="/shop/" aria-current={current('/shop/')}>Shop</a>
+      <a href="/today/" aria-current={current('/today/')}>Today's Drop</a>
+      <a href="/combos/" aria-current={current('/combos/')}>Combos</a>
+      <a href="/contact/" aria-current={current('/contact/')}>Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" type="button" data-open-search aria-label="Search products" aria-haspopup="dialog">
+        <Icon name="search" />
+      </button>
+      <a class="icon-btn" href="/wishlist/" aria-label="Wishlist">
+        <Icon name="heart" />
+        <span class="count-dot" data-wish-count hidden>0</span>
+      </a>
+      <a class="icon-btn" href="/bag/" aria-label="Bag" data-bag-link>
+        <Icon name="bag" />
+        <span class="count-dot" data-bag-count hidden>0</span>
+      </a>
+      <button class="icon-btn menu-btn" type="button" data-open-menu aria-label="Open menu" aria-haspopup="dialog">
+        <Icon name="menu" />
+      </button>
+    </div>
+  </div>
+</header>
+
+<dialog class="sheet" id="menu-sheet" aria-label="Menu" data-lenis-prevent>
+  <div class="wrap sheet-inner">
+    <div class="sheet-top">
+      <a class="brand" href="/" aria-label="DITTO HUB home"><Mark class="brand-mark" /><Wordmark class="brand-word" /></a>
+      <button class="icon-btn" type="button" data-close-sheet aria-label="Close menu"><Icon name="close" /></button>
+    </div>
+    <nav aria-label="Menu">
+      <ul class="menu-links">
+        <li><a href="/shop/">Shop all <small>{products.length} products</small></a></li>
+        <li><a href="/today/">Today's drop <small>New arrivals and offers</small></a></li>
+        {CATEGORIES.map((c) => <li><a href={`/${c.id}/`}>{c.label} <small>{counts[c.id]} items</small></a></li>)}
+        <li><a href="/combos/">Combos <small>Save more together</small></a></li>
+        <li><a href="/wishlist/">Wishlist</a></li>
+        <li><a href="/contact/">Contact and how to order</a></li>
+      </ul>
+    </nav>
+    <div class="menu-contact">
+      <a class="btn btn-wa" href={generalWa} target="_blank" rel="noopener" data-track="whatsapp-menu"><Icon name="chat" />Chat on WhatsApp</a>
+      <a class="btn btn-ghost" href={telUrl(settings.phone)} data-track="call-menu"><Icon name="phone" />Call {prettyPhone(settings.phone)}</a>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="sheet" id="search-sheet" aria-label="Search products" data-lenis-prevent>
+  <div class="wrap sheet-inner">
+    <div class="sheet-top">
+      <form class="search-box" role="search" style="flex: 1" data-search-form>
+        <label class="visually-hidden" for="site-search">Search products</label>
+        <Icon name="search" />
+        <input class="input" id="site-search" type="search" name="q" placeholder="Search sneakers, watches, gadgets" autocomplete="off" enterkeyhint="search" />
+      </form>
+      <button class="icon-btn" type="button" data-close-sheet aria-label="Close search"><Icon name="close" /></button>
+    </div>
+    <div class="quick-links" data-search-quick>
+      {CATEGORIES.map((c) => <a class="chip" href={`/${c.id}/`}>{c.label}</a>)}
+      <a class="chip" href="/shop/?tier=under-499">Under ₹499</a>
+      <a class="chip" href="/combos/">Combos</a>
+    </div>
+    <p class="search-empty" data-search-status aria-live="polite"></p>
+    <ul class="search-results" data-search-results></ul>
+  </div>
+</dialog>

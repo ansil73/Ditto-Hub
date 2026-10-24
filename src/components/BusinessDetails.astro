@@ -1,0 +1,55 @@
+---
+// Business details required on contact and policy pages. Empty fields show a clear
+// placeholder until the owner fills them in under Settings in /admin.
+import { settings } from '../lib/catalog';
+import { prettyPhone, telUrl } from '../lib/messages';
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+const b = settings.business;
+const missing = (v: string, what: string) => v || `[Add your ${what} in Settings]`;
+---
+
+<dl class:list={['business', className]}>
+  <div><dt>Business</dt><dd>{b.legalName || settings.shopName}</dd></div>
+  <div><dt>Address</dt><dd>{missing(b.address, 'address')}</dd></div>
+  <div><dt>Phone</dt><dd><a href={telUrl(settings.phone)}>{prettyPhone(settings.phone)}</a></dd></div>
+  <div><dt>Email</dt><dd>{b.email ? <a href={`mailto:${b.email}`}>{b.email}</a> : missing('', 'email')}</dd></div>
+  <div><dt>Grievance contact</dt><dd>{missing(b.grievanceContact, 'grievance contact')}</dd></div>
+</dl>
+
+<style>
+  .business {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 18px;
+    border-radius: var(--r-m);
+    border: 1px dashed var(--steel-2);
+  }
+
+  .business div {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .business dt {
+    color: var(--mist);
+    font-weight: 700;
+  }
+
+  .business dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 480px) {
+    .business div {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
+</style>

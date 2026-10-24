@@ -1,0 +1,144 @@
+---
+// 3D banner at the top of the category and combo pages: a giant outline word,
+// one or two floating cut-out photos, and the page title. It tilts with the mouse
+// (or the phone's gyroscope on Android) through [data-tilt].
+interface Props {
+  word: string;
+  cutouts: string[];
+}
+const { word, cutouts } = Astro.props;
+const shown = cutouts.slice(0, 2);
+---
+
+<section class="wrap cat-hero">
+  <div class:list={['cat-hero-inner', { 'is-pair': shown.length > 1 }]} data-tilt>
+    <span class="cat-word" aria-hidden="true">{word}</span>
+    {
+      shown.map((src, i) => (
+        <img
+          class="cat-cutout"
+          style={`--i: ${i}`}
+          src={src}
+          alt=""
+          width="1000"
+          height="1000"
+          fetchpriority={i === 0 ? 'high' : undefined}
+          decoding="async"
+        />
+      ))
+    }
+    <div class="cat-text">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  .cat-hero {
+    padding-top: clamp(16px, 3vw, 32px);
+    padding-bottom: clamp(20px, 3vw, 32px);
+  }
+
+  .cat-hero-inner {
+    position: relative;
+    display: grid;
+    align-items: end;
+    min-height: clamp(300px, 42vw, 440px);
+    padding: clamp(20px, 4vw, 48px);
+    border-radius: var(--r-l);
+    border: 1px solid var(--steel);
+    background:
+      radial-gradient(50% 70% at 75% 45%, rgba(217, 176, 97, 0.18), transparent 70%),
+      var(--graphite);
+    overflow: hidden;
+    isolation: isolate;
+    transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  .cat-word {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: -1;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(3.6rem, 15vw, 13rem);
+    letter-spacing: -0.03em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(244, 242, 238, 0.12);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .cat-cutout {
+    position: absolute;
+    right: clamp(8px, 3%, 40px);
+    top: 50%;
+    width: min(56%, 440px);
+    transform: translateY(-50%);
+    filter: drop-shadow(0 34px 30px rgba(0, 0, 0, 0.6));
+    animation: cat-float 6s ease-in-out infinite;
+  }
+
+  /* Two products (combos): the first sits back and left, the second forward and right. */
+  .is-pair .cat-cutout {
+    width: min(36%, 330px);
+    right: calc(clamp(8px, 3%, 40px) + var(--i) * 0px + (1 - var(--i)) * min(26%, 240px));
+    top: calc(50% + var(--i) * 26px);
+    animation-delay: calc(var(--i) * -3s);
+  }
+
+  .is-pair .cat-cutout:first-of-type {
+    filter: drop-shadow(0 30px 26px rgba(0, 0, 0, 0.6)) brightness(0.92);
+  }
+
+  .cat-text {
+    position: relative;
+    display: grid;
+    gap: 10px;
+    max-width: 560px;
+  }
+
+  @media (max-width: 719px) {
+    .cat-hero-inner {
+      min-height: 420px;
+    }
+
+    .cat-cutout {
+      right: 50%;
+      top: 34%;
+      width: min(78%, 320px);
+      transform: translate(50%, -50%);
+      animation: none;
+    }
+
+    .is-pair .cat-cutout {
+      width: min(50%, 220px);
+      right: calc(50% - 26% + var(--i) * 52%);
+      top: calc(30% + var(--i) * 22px);
+    }
+  }
+
+  @keyframes cat-float {
+    0%,
+    100% {
+      transform: translateY(-50%);
+    }
+    50% {
+      transform: translateY(calc(-50% - 12px));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cat-cutout {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { initTilt } from '../scripts/tilt';
+  initTilt();
+</script>

@@ -1,0 +1,34 @@
+{
+  "id": "DH-GD-0001",
+  "name": "Pocket Vac Mini",
+  "category": "gadgets",
+  "type": "home",
+  "price": 899,
+  "mrp": 1799,
+  "stock": 8,
+  "sizes": [],
+  "colours": [
+    "Graphite / Teal"
+  ],
+  "images": [
+    "/products/DH-GD-0001/1.webp",
+    "/products/DH-GD-0001/2.webp"
+  ],
+  "cutout": "/products/DH-GD-0001/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "USB-C charging",
+    "Washable filter",
+    "Fits in a drawer"
+  ],
+  "inBox": "Vacuum, 2 nozzles, charging cable",
+  "description": "Cordless mini vacuum for desks, car seats and keyboards.",
+  "tags": [
+    "bestseller"
+  ],
+  "arrivalDate": "2026-10-24",
+  "status": "active",
+  "sample": true
+}

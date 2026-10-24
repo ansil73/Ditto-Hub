@@ -1,0 +1,34 @@
+{
+  "id": "DH-WT-0001",
+  "name": "Midnight Chrono",
+  "category": "watches",
+  "type": "analog",
+  "price": 699,
+  "mrp": 1499,
+  "stock": 6,
+  "sizes": [],
+  "colours": [
+    "Black / Gold"
+  ],
+  "images": [
+    "/products/DH-WT-0001/1.webp",
+    "/products/DH-WT-0001/2.webp"
+  ],
+  "cutout": "/products/DH-WT-0001/cutout.webp",
+  "model": null,
+  "spinFrames": 0,
+  "video": null,
+  "highlights": [
+    "Three working sub-dials",
+    "Gold-tone case",
+    "Soft silicone strap"
+  ],
+  "inBox": "Watch and box",
+  "description": "Black dial, gold details and sub-dials that work, for a sharp everyday look.",
+  "tags": [
+    "bestseller"
+  ],
+  "arrivalDate": "2026-10-24",
+  "status": "active",
+  "sample": true
+}
