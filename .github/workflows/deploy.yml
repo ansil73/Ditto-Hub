@@ -41,7 +41,7 @@ jobs:
           restore-keys: images-
 
       - run: npm run build
-            - name: Verify Astro homepage output
+      - name: Verify Astro homepage output
         run: |
           echo "Checking generated website files..."
           if [ ! -d dist ]; then
