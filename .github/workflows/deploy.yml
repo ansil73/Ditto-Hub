@@ -41,7 +41,20 @@ jobs:
           restore-keys: images-
 
       - run: npm run build
-
+            - name: Verify Astro homepage output
+        run: |
+          echo "Checking generated website files..."
+          if [ ! -d dist ]; then
+            echo "::error::The dist folder was not created."
+            exit 1
+          fi
+          echo "HTML files generated:"
+          find dist -type f -name '*.html' | sort | head -80
+          if [ ! -f dist/index.html ]; then
+            echo "::error::dist/index.html is missing."
+            exit 1
+          fi
+          echo "SUCCESS: Homepage dist/index.html exists."
       # First run only: creates the "ditto-hub" Pages project if it does not exist yet.
       - name: Make sure the Cloudflare Pages project exists
         env:
