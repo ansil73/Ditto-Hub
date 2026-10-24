@@ -1,0 +1,32 @@
+{
+  "shopName": "DITTO HUB",
+  "tagline": "Luxury looks. Budget prices.",
+  "whatsapp": "919995706323",
+  "phone": "+918078102296",
+  "instagram": "_ditto.hub._",
+  "whatsappGroup": "https://chat.whatsapp.com/KniYGM5cJ9n2shVD49lqcW",
+  "announcement": "Today's drop is live",
+  "deliveryText": "All-India delivery",
+  "cod": false,
+  "featured": {
+    "sneaker": "DH-SN-0001",
+    "watch": "DH-WT-0001",
+    "gadget": "DH-GD-0001"
+  },
+  "instaImages": [
+    "/insta/1.webp",
+    "/insta/2.webp",
+    "/insta/3.webp",
+    "/insta/4.webp",
+    "/insta/5.webp",
+    "/insta/6.webp"
+  ],
+  "business": {
+    "legalName": "DITTO HUB",
+    "address": "",
+    "email": "",
+    "grievanceContact": ""
+  },
+  "analytics": false,
+  "goatcounterCode": ""
+}
