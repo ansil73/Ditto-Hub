@@ -1,0 +1,30 @@
+{
+  "id": "DH-WT-0001",
+  "name": "Chain watch",
+  "category": "watches",
+  "type": "Analog",
+  "price": 999,
+  "mrp": 1199,
+  "stock": 10,
+  "sizes": [],
+  "colours": [
+    "Black"
+  ],
+  "images": [
+    "/products/DH-WT-0001-1/WhatsApp-Image-2026-10-25-at-11-17-21-AM.webp",
+    "/products/DH-WT-0001-1/WhatsApp-Image-2026-10-25-at-11-17-30-AM.webp",
+    "/products/DH-WT-0001-1/WhatsApp-Image-2026-10-25-at-11-17-32-AM.webp",
+    "/products/DH-WT-0001-1/WhatsApp-Image-2026-10-25-at-11-17-33-AM.webp"
+  ],
+  "cutout": "",
+  "model": "",
+  "spinFrames": 0,
+  "video": "",
+  "highlights": [],
+  "inBox": "",
+  "description": "⌚ Classy look. Premium vibes🔥\n\nAvailable in 3 stylish colours 🖤💚💙",
+  "tags": [],
+  "arrivalDate": "2026-10-25",
+  "status": "active",
+  "sample": false
+}
