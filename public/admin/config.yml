@@ -5,7 +5,7 @@
 
 backend:
   name: github
-  repo: YOUR-GITHUB-USERNAME/ditto-hub # CHANGE ME: your GitHub username / repository name
+  repo: ansil73/ditto-hub # CHANGE ME: your GitHub username / repository name
   branch: main
   # Sign-in button "Sign in with GitHub" needs the free Sveltia auth worker (README → Admin, step 3).
   # Until then you can use "Sign in with token" with a GitHub access token.
